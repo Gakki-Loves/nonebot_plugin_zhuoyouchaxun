@@ -1,0 +1,2 @@
+# nonebot_plugin_zhuoyouchaxun
+对数据库中的桌游信息进行查询操作
