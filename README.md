@@ -1,3 +1,15 @@
+<p align="center">
+  <a href="https://v2.nonebot.dev/"><img src="https://v2.nonebot.dev/logo.png" width="200" height="200" alt="nonebot"></a>
+</p>
+
+<div align="center">
+
+# nonebot-plugin-zhuoyouchaxun
+
+_✨ NoneBot 桌游查询 ✨_
+
+</div>
+
 # nonebot_plugin_zhuoyouchaxun
 对数据库中的桌游信息进行查询操作
 
