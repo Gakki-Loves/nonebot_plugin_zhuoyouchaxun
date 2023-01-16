@@ -57,7 +57,7 @@ def get_idname(name)-> list:
         data.append(msg_list)
         return [data]
 
-
+# 桌游具体信息查询，参数为桌游ID
 def get_BGinfo(bgid):
     data = []
     msg_list = []
@@ -99,3 +99,42 @@ def get_BGinfo(bgid):
         )
         data.append(msg)
         return [data]
+
+#查询图包信息，返回参数为图包id和图包名称
+def get_tubaoname(tubao_name):
+    data = []
+    msg_list = []
+    # 连接数据库
+    conn = sqlite3.connect(
+       Path(os.path.join(os.path.dirname(__file__), "resource"))/"zhuoyou.db")
+    # 创建游标
+    #conn = sqlite3.connect(r'D:\Github\LihuaBot\nb2\LihuaBot\src\plugins\nonebot_plugin_zhuoyouchaxun\resource\zhuoyou.db')
+    cur = conn.cursor()
+    # 通过cur.execute执行sql语句，操作数据库
+    cursor = cur.execute(
+        f"SELECT tubao_id,tubao_name, file_name  from tubao WHERE (tubao_name like '%{tubao_name}%' or file_name like '%{tubao_name}%' ) "
+    )
+    # 得到查询结果
+    db_data = cur.fetchall()
+
+    # 断开数据库连接
+    conn.close()
+
+    # 如果没有结果
+    if db_data == []:
+        data.append([False,error, f"数据库中没有搜到关于{tubao_name}的信息。"])
+        return data
+    else:
+        data.append(True)
+        for i in range(len(db_data)):
+            msg = (
+                db_data[i][0]
+                + ":"
+                + db_data[i][2]
+                + "\n"
+            )
+            msg_list.append(msg)
+        data.append(msg_list)
+        return [data]
+
+
