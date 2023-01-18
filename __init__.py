@@ -8,6 +8,7 @@
 #'''
 
 import asyncio
+from nonebot import on_command
 from nonebot.plugin import on_keyword,on_regex
 from nonebot.adapters.onebot.v11 import Bot, Event
 from nonebot.adapters.onebot.v11.message import Message
@@ -22,7 +23,7 @@ from nonebot.log import logger
 from nonebot.exception import ActionFailed
 
 from  nonebot . params  import  Arg ,  CommandArg ,  ArgPlainText 
-from .get_data import get_idname,get_BGinfo,get_tubaoname
+from .get_data import get_idname,get_BGinfo,get_tubaoname,get_tubaoinfo
 
 #hello = on_keyword(['桌游查询','今日人品'],priority=50)
 #@hello.handle()
@@ -32,6 +33,11 @@ from .get_data import get_idname,get_BGinfo,get_tubaoname
         #message="Hello"
     #)
 
+# ──────▄▀▄─────▄▀▄
+# ─────▄█░░▀▀▀▀▀░░█▄
+# ─▄▄──█░░░░░░░░░░░█──▄▄
+# █▄▄█─█░░▀░░┬░░▀░░█─█▄▄█
+                            
 # -------------- 初始化变量 -------------------
 # 读取桌游信息查询的正则表达
 try:
@@ -164,4 +170,39 @@ async def _(bot: Bot, event: MessageEvent,state: T_State):
             message=Message(f"梨花酱被风控了呢！请联系主人将我解封哦~"),
             at_sender=True
         )
-    
+
+@tubao.got("tubao_id")
+async def _(tubao_id: str = ArgPlainText("tubao_id")):
+    #BGID
+    tubao_data = get_tubaoinfo(tubao_id)
+
+    message_list = []
+    for tubao_link in tubao_data:
+        # 如果idname0的状态为True，说明有这个信息
+        if tubao_link[0]:               
+            message = Message(tubao_link[1])
+            message_list.append(message)
+        # 如果为false，说明没有这个信息
+        else:
+            message = tubao_link[1]+tubao_link[2]
+            message_list.append(message)
+
+    for msg in message_list:
+            #await chaxun.send(msg)
+            await tubao.send(msg)
+            await asyncio.sleep(0.5)
+
+
+
+#发车
+run_car = on_keyword(['桌游发车'],priority=60)
+@run_car.handle()
+async def _(bot: Bot, event: MessageEvent):
+    await run_car.send("请输入发车信息")
+
+@run_car.got("content")
+async def _(content: str = ArgPlainText("content")):
+    #BGID
+    await run_car.send(content)
+
+

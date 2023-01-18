@@ -21,7 +21,7 @@ error = "Error:"
 
 
 #返回列表，内容为桌游id和桌游名称
-def get_idname(name)-> list:
+def get_idname(name):
     data = []
     msg_list = []
     # 连接数据库
@@ -41,21 +41,24 @@ def get_idname(name)-> list:
     conn.close()
 
     # 如果没有结果
-    if db_data == []:
-        data.append([False,error, f"数据库中没有搜到关于{name}的信息。"])
-        return data
-    else:
-        data.append(True)
-        for i in range(len(db_data)):
-            msg = (
-                db_data[i][0]
-                + ":"
-                + db_data[i][1]
-                + "\n"
-            )
-            msg_list.append(msg)
-        data.append(msg_list)
-        return [data]
+    try:
+        if db_data == []:
+            data.append([False,error, f"数据库中没有搜到关于{name}的信息。"])
+            return data
+        else:
+            data.append(True)
+            for i in range(len(db_data)):
+                msg = (
+                    db_data[i][0]
+                    + ":"
+                    + db_data[i][1]
+                    + "\n"
+                )
+                msg_list.append(msg)
+            data.append(msg_list)
+            return [data]
+    except:
+        return [False,error, f"查询失败了呢，请仔细查看使用说明书呦~"]
 
 # 桌游具体信息查询，参数为桌游ID
 def get_BGinfo(bgid):
@@ -77,28 +80,31 @@ def get_BGinfo(bgid):
     # 断开数据库连接
     conn.close()
 
-        # 如果没有结果
-    if db_data == []:
-        data.append([False,error, f"数据库中没有搜到桌游ID:{bgid}的信息。"])
-        return data
-    else:
-        data.append(True)
-        msg = (
-            "桌游ID:"+ db_data[0][0]
-            + "\n桌游名称:"+ db_data[0][1]
-            + "\n游戏模式:"+ db_data[0][2]
-            + "\n游戏分类:"+ db_data[0][3]
-            + "/"+ db_data[0][4]
-            + "\n人均时长:"+ db_data[0][5]
-            + "\n上手难度:"+ db_data[0][6]
-            + "\n集石评分:"+ db_data[0][7]
-            + "\n简介:"+ db_data[0][8]
-            + "\n集石链接:"+ db_data[0][9]
-            + "\nBGGid:"+ db_data[0][10]
-            + "\nBGG链接:"+ db_data[0][11]
-        )
-        data.append(msg)
-        return [data]
+    # 如果没有结果
+    try:
+        if db_data == []:
+            data.append([False,error, f"梨花酱数据库中没有搜到桌游ID:{bgid}的信息。"])
+            return data
+        else:
+            data.append(True)
+            msg = (
+                "桌游ID:"+ db_data[0][0]
+                + "\n桌游名称:"+ db_data[0][1]
+                + "\n游戏模式:"+ db_data[0][2]
+                + "\n游戏分类:"+ db_data[0][3]
+                + "/"+ db_data[0][4]
+                + "\n人均时长:"+ db_data[0][5]
+                + "\n上手难度:"+ db_data[0][6]
+                + "\n集石评分:"+ db_data[0][7]
+                + "\n简介:"+ db_data[0][8]
+                + "\n集石链接:"+ db_data[0][9]
+                + "\nBGGid:"+ db_data[0][10]
+                + "\nBGG链接:"+ db_data[0][11]
+            )
+            data.append(msg)
+            return [data]
+    except:
+        return [False,error, f"查询失败了呢，请仔细查看使用说明书呦~"]
 
 #查询图包信息，返回参数为图包id和图包名称
 def get_tubaoname(tubao_name):
@@ -121,20 +127,68 @@ def get_tubaoname(tubao_name):
     conn.close()
 
     # 如果没有结果
-    if db_data == []:
-        data.append([False,error, f"数据库中没有搜到关于{tubao_name}的信息。"])
-        return data
-    else:
-        data.append(True)
-        for i in range(len(db_data)):
+    try:
+        if db_data == []:
+            data.append([False,error, f"梨花酱数据库中没有搜到关于{tubao_name}的信息。"])
+            return data
+        else:
+            data.append(True)
+            for i in range(len(db_data)):
+                msg = (
+                    db_data[i][0]
+                    + ":"
+                    + db_data[i][2]
+                    + "\n"
+                )
+                msg_list.append(msg)
+            data.append(msg_list)
+            return [data]
+    except:
+        return [False,error, f"查询失败了呢，请仔细查看使用说明书呦~"]
+
+#根据图包id获取图包链接
+def get_tubaoinfo(tubao_id):
+    data = []
+    # 连接数据库
+    conn = sqlite3.connect(
+       Path(os.path.join(os.path.dirname(__file__), "resource"))/"zhuoyou.db")
+    # 创建游标
+    #conn = sqlite3.connect(r'D:\Github\LihuaBot\nb2\LihuaBot\src\plugins\nonebot_plugin_zhuoyouchaxun\resource\zhuoyou.db')
+    cur = conn.cursor()
+    # 通过cur.execute执行sql语句，操作数据库
+    cursor = cur.execute(
+        f"SELECT * from tubao WHERE tubao_id like '{tubao_id}' "
+    )
+    # 得到查询结果
+    db_data = cur.fetchall()
+
+    # 断开数据库连接
+    conn.close()
+
+    # 如果没有结果
+    try:
+        if db_data == []:
+            data.append([False,error, f"梨花酱没有搜到图包ID:{tubao_id}的信息呢~请发送准确的图包ID呦"])
+            return data
+        else:
+            data.append(True)
             msg = (
-                db_data[i][0]
-                + ":"
-                + db_data[i][2]
-                + "\n"
+                "图包ID:"+ db_data[0][0]
+                #+ "\n图包名称:"+ db_data[0][1]
+                + "\n文件名称:"+ db_data[0][2]
+                + "\n链接:"+ db_data[0][3]
             )
-            msg_list.append(msg)
-        data.append(msg_list)
-        return [data]
+            data.append(msg)
+            return [data]
 
+    except:
+        return [False,error, f"查询失败了呢，请仔细查看使用说明书呦~"]
 
+def run_car(user_id):
+    # 连接数据库
+    conn = sqlite3.connect(
+       Path(os.path.join(os.path.dirname(__file__), "resource"))/"zhuoyou.db")
+    # 创建游标
+    #conn = sqlite3.connect(r'D:\Github\LihuaBot\nb2\LihuaBot\src\plugins\nonebot_plugin_zhuoyouchaxun\resource\zhuoyou.db')
+    cur = conn.cursor()
+    
