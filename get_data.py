@@ -16,7 +16,7 @@ import sqlite3
 from httpx import AsyncClient
 from pathlib import Path
 #from nonebot.log import logger
-error = "Error:"
+error = "出错啦！"
 
 
 
@@ -32,7 +32,7 @@ def get_idname(name):
     cur = conn.cursor()
     # 通过cur.execute执行sql语句，操作数据库
     cursor = cur.execute(
-        f"SELECT BGId,BGName from main WHERE BGName like '%{name}%' "
+        f"SELECT BGId,BGName from boardgame WHERE BGName like '%{name}%' "
     )
     # 得到查询结果
     db_data = cur.fetchall()
@@ -43,7 +43,7 @@ def get_idname(name):
     # 如果没有结果
     try:
         if db_data == []:
-            data.append([False,error, f"数据库中没有搜到关于{name}的信息。"])
+            data.append([False,error, f"数据库中没有搜到关于{name}的信息哦~请尝试换一个名字或使用英文~"])
             return data
         else:
             data.append(True)
@@ -63,7 +63,6 @@ def get_idname(name):
 # 桌游具体信息查询，参数为桌游ID
 def get_BGinfo(bgid):
     data = []
-    msg_list = []
     # 连接数据库
     conn = sqlite3.connect(
        Path(os.path.join(os.path.dirname(__file__), "resource"))/"zhuoyou.db")
@@ -72,7 +71,7 @@ def get_BGinfo(bgid):
     cur = conn.cursor()
     # 通过cur.execute执行sql语句，操作数据库
     cursor = cur.execute(
-        f"SELECT * from main WHERE BGId like '{bgid}' "
+        f"SELECT * from boardgame WHERE BGId like '{bgid}' "
     )
     # 得到查询结果
     db_data = cur.fetchall()
@@ -83,7 +82,7 @@ def get_BGinfo(bgid):
     # 如果没有结果
     try:
         if db_data == []:
-            data.append([False,error, f"梨花酱数据库中没有搜到桌游ID:{bgid}的信息。"])
+            data.append([False,error, f"梨花酱没有搜到桌游ID:{bgid}的信息~要认真校对哦"])
             return data
         else:
             data.append(True)
@@ -129,7 +128,7 @@ def get_tubaoname(tubao_name):
     # 如果没有结果
     try:
         if db_data == []:
-            data.append([False,error, f"梨花酱数据库中没有搜到关于{tubao_name}的信息。"])
+            data.append([False,error, f"梨花酱没有搜到关于{tubao_name}的信息~请尝试换一个名字或使用英文~"])
             return data
         else:
             data.append(True)
@@ -184,11 +183,19 @@ def get_tubaoinfo(tubao_id):
     except:
         return [False,error, f"查询失败了呢，请仔细查看使用说明书呦~"]
 
-def run_car(user_id):
+def runcar(user_id,content,deadline):
     # 连接数据库
     conn = sqlite3.connect(
        Path(os.path.join(os.path.dirname(__file__), "resource"))/"zhuoyou.db")
     # 创建游标
     #conn = sqlite3.connect(r'D:\Github\LihuaBot\nb2\LihuaBot\src\plugins\nonebot_plugin_zhuoyouchaxun\resource\zhuoyou.db')
     cur = conn.cursor()
+    f"INSERT INTO cheche VALUES({user_id},{content})"
+    cur.execute(
+        f"INSERT INTO cheche VALUES('{user_id}','{content}','{deadline}')"
+    ) 
+    #提交事务
+    conn.commit()
+    conn.close()
+    
     

@@ -23,15 +23,9 @@ from nonebot.log import logger
 from nonebot.exception import ActionFailed
 
 from  nonebot . params  import  Arg ,  CommandArg ,  ArgPlainText 
-from .get_data import get_idname,get_BGinfo,get_tubaoname,get_tubaoinfo
+from .get_data import get_idname,get_BGinfo,get_tubaoname,get_tubaoinfo,runcar
 
-#hello = on_keyword(['桌游查询','今日人品'],priority=50)
-#@hello.handle()
-#async def hello_handle(bot: Bot, event: Event):
-    #await bot.send(
-        #event=event,
-        #message="Hello"
-    #)
+
 
 # ──────▄▀▄─────▄▀▄
 # ─────▄█░░▀▀▀▀▀░░█▄
@@ -50,6 +44,9 @@ try:
     chaxun_tubao = repr(nonebot.get_driver().config.chaxun_tubao)
 except:
     chaxun_tubao = r"^(图包查询|tbcx)\s?([\u4E00-\u9FA5A-Za-z0-9]+$)"  #桌游查询 卡坦岛
+
+
+# --------------- 复用的功能 ---------------
 
 
 
@@ -194,15 +191,29 @@ async def _(tubao_id: str = ArgPlainText("tubao_id")):
 
 
 
-#发车
-run_car = on_keyword(['桌游发车'],priority=60)
+# 发车
+run_car = on_command("桌游发车",block=True,priority=10)
 @run_car.handle()
-async def _(bot: Bot, event: MessageEvent):
+async def _(bot: Bot, event: MessageEvent,state:T_State):
+    # 用state字典把这里获取的user_id保存
+    state['userid'] = str(event.user_id)
     await run_car.send("请输入发车信息")
 
 @run_car.got("content")
-async def _(content: str = ArgPlainText("content")):
-    #BGID
-    await run_car.send(content)
+async def _(state:T_State,content: str = ArgPlainText("content"),prompt="模板"):
+    # 获取刚刚获得的user_id，这样就能跨函数使用
+    #car_id = str(state['userid'])
+    state['content'] = content
+    await run_car.send("请输入截止时间~例如“21:50”")
+    #runcar(car_id,content)
 
-
+@run_car.got("deadline")
+async def _(state:T_State,deadline: str = ArgPlainText("deadline")):
+    # 获取刚刚获得的user_id，这样就能跨函数使用
+    #car_id = str(state['userid'])
+    state['deadline'] = deadline
+    car_id = str(state['userid'])
+    content = str(state['content'])
+    runcar(car_id,content,deadline)
+    #runcar(car_id,content)
+# 帮助菜单
