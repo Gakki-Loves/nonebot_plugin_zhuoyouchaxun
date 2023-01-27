@@ -43,7 +43,7 @@ def get_idname(name):
     # 如果没有结果
     try:
         if db_data == []:
-            data.append([False,error, f"数据库中没有搜到关于{name}的信息哦~请尝试换一个名字或使用英文~"])
+            data.append([False,error, f"图书馆里中没有搜到关于{name}的信息啦~请告诉梨花其他的名字或英文~"])
             return data
         else:
             data.append(True)
@@ -58,7 +58,7 @@ def get_idname(name):
             data.append(msg_list)
             return [data]
     except:
-        return [False,error, f"查询失败了呢，请仔细查看使用说明书呦~"]
+        return [False,error, f"查询失败啦！好好看群公告的命令~梨花不喜欢和不看群公告的人说发！"]
 
 # 桌游具体信息查询，参数为桌游ID
 def get_BGinfo(bgid):
@@ -103,7 +103,7 @@ def get_BGinfo(bgid):
             data.append(msg)
             return [data]
     except:
-        return [False,error, f"查询失败了呢，请仔细查看使用说明书呦~"]
+        return [False,error, f"你说的梨花听不懂啦！好好看看群公告里的命令再找我！"]
 
 #查询图包信息，返回参数为图包id和图包名称
 def get_tubaoname(tubao_name):
@@ -128,7 +128,7 @@ def get_tubaoname(tubao_name):
     # 如果没有结果
     try:
         if db_data == []:
-            data.append([False,error, f"梨花酱没有搜到关于{tubao_name}的信息~请尝试换一个名字或使用英文~"])
+            data.append([False,error, f"图书馆里中没有搜到关于{tubao_name}的信息啦~请告诉梨花其他的名字或英文~"])
             return data
         else:
             data.append(True)
@@ -143,7 +143,7 @@ def get_tubaoname(tubao_name):
             data.append(msg_list)
             return [data]
     except:
-        return [False,error, f"查询失败了呢，请仔细查看使用说明书呦~"]
+        return [False,error, f"查询失败啦！好好看群公告的命令~梨花不喜欢和不看群公告的人说发！"]
 
 #根据图包id获取图包链接
 def get_tubaoinfo(tubao_id):
@@ -181,7 +181,7 @@ def get_tubaoinfo(tubao_id):
             return [data]
 
     except:
-        return [False,error, f"查询失败了呢，请仔细查看使用说明书呦~"]
+        return [False,error, f"查询失败啦！好好看群公告的命令~梨花不喜欢和不看群公告的人说发！~"]
 
 def runcar(user_id,content,deadline):
     # 连接数据库
