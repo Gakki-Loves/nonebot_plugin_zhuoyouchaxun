@@ -7,23 +7,31 @@
 #Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
 #'''
 
+from nonebot import require
+require("nonebot_plugin_apscheduler")
+from nonebot_plugin_apscheduler import scheduler
+
 import asyncio
 from nonebot import on_command
+from nonebot import on_notice
 from nonebot.plugin import on_keyword,on_regex
-from nonebot.adapters.onebot.v11 import Bot, Event
+from nonebot.adapters.onebot.v11 import Bot, Event,NoticeEvent
 from nonebot.adapters.onebot.v11.message import Message
 import nonebot
 from nonebot.adapters.onebot.v11 import (GROUP, PRIVATE_FRIEND, Bot,
                                          GroupMessageEvent, Message,
                                          MessageEvent, MessageSegment,
-                                         PrivateMessageEvent)
-
+                                         PrivateMessageEvent,GroupIncreaseNoticeEvent)
+import sqlite3
+from pathlib import Path
+import os
 from nonebot.typing import T_State
 from nonebot.log import logger
 from nonebot.exception import ActionFailed
 
+from nonebot import on_request
 from  nonebot . params  import  Arg ,  CommandArg ,  ArgPlainText 
-from .get_data import get_idname,get_BGinfo,get_tubaoname,get_tubaoinfo,runcar
+from .get_data import get_idname,get_BGinfo,get_tubaoname,get_tubaoinfo,runcar,searchcar
 
 
 
@@ -269,7 +277,7 @@ async def _(bot:Bot,event:MessageEvent,state: T_State,tubao_id: str = ArgPlainTe
 
 
 
-# 发车
+# ----------------------发车------------------------------
 run_car = on_command("桌游发车",block=True,priority=10)
 @run_car.handle()
 async def _(bot: Bot, event: MessageEvent,state:T_State):
@@ -290,8 +298,60 @@ async def _(state:T_State,deadline: str = ArgPlainText("deadline")):
     # 获取刚刚获得的user_id，这样就能跨函数使用
     #car_id = str(state['userid'])
     state['deadline'] = deadline
-    car_id = str(state['userid'])
-    content = str(state['content'])
-    runcar(car_id,content,deadline)
+    deadline = deadline.replace("：", ":")
+    if "24:00">=deadline>="00:00":
+        car_id = str(state['userid'])
+        content = str(state['content'])
+        runcar(car_id,content,deadline)
+    else:
+        await run_car.finish("敲你脑袋哦！时间要正确填写！")
     #runcar(car_id,content)
-# 帮助菜单
+### -发完车的广播功能未写
+
+# -----------------------查车-----------------------
+search_car = on_command("桌游查车",block=True,priority=11)
+@search_car.handle()
+async def _(bot: Bot, event: MessageEvent,state:T_State):
+    # 用state字典把这里获取的user_id保存
+    #state['userid'] = str(event.user_id)
+    msg = searchcar()
+    ### -查车返回功能没写
+# -----------------------------------------------------
+
+# -----------------------cheche表每天删除-----------------------
+# 定时任务函数
+def clear_table():
+    conn = sqlite3.connect(
+       Path(os.path.join(os.path.dirname(__file__), "resource"))/"zhuoyou.db")
+    c = conn.cursor()
+    c.execute(f'DELETE FROM cheche')
+    conn.commit()
+    print('Clear table successfully!')
+
+
+# 将函数注册为定时任务
+@scheduler.scheduled_job('cron', hour='0')
+async def _():
+    clear_table()
+
+# -----------------------------------------------------
+
+
+
+# -----------------------帮助菜单-----------------------
+#
+# -----------------------------------------------------
+
+
+# ------------------欢迎新群友----------------
+# -初始化
+notice_handle  = on_notice ( priority =5,  block =True ) 
+
+@notice_handle.handle () 
+async  def  GroupNewMember ( bot :  Bot ,  event :  GroupIncreaseNoticeEvent ): 
+    if  event . user_id  == event . self_id : 
+        await  bot . send_group_msg ( group_id =event . group_id ,  message =Message ( 
+            MessageSegment . text ( '小伙伴们好呀~我是梨花酱，是桌游图书馆的管理员哦~\n' ) ) )
+    else:
+        await bot.send_group_msg ( group_id =event . group_id ,  message =Message ( 
+            MessageSegment . at ( event . user_id )  + MessageSegment . text ( "欢迎新桌友哦~我是桌游图书馆管理员梨花酱，请注意查看群公告内容~\n" ))) 

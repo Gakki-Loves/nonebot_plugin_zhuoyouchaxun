@@ -10,14 +10,16 @@
 
 
 import os
-import asyncio
-import nonebot
+#import asyncio
+#import nonebot
 import sqlite3
 from httpx import AsyncClient
 from pathlib import Path
 #from nonebot.log import logger
 error = "出错啦！"
-
+from datetime import datetime
+from nonebot import utils
+import re
 
 
 #返回列表，内容为桌游id和桌游名称
@@ -197,5 +199,50 @@ def runcar(user_id,content,deadline):
     #提交事务
     conn.commit()
     conn.close()
+    
+def searchcar():
+    data = []
+    msg = []
+    msg_list = []
+    conn = sqlite3.connect(
+       Path(os.path.join(os.path.dirname(__file__), "resource"))/"zhuoyou.db")
+    # 创建游标
+    #conn = sqlite3.connect(r'D:\Github\LihuaBot\nb2\LihuaBot\src\plugins\nonebot_plugin_zhuoyouchaxun\resource\zhuoyou.db')
+    cur = conn.cursor()
+    cursor = cur.execute(
+        f"SELECT * from cheche "
+    )
+    db_data = cur.fetchall()
+    conn.close
+    try:
+        if db_data == []:
+            data.append([False,error, f"梨花去转了一圈，现在没有正在开的车车哦~"])
+            return data
+        else:
+            data.append(True)
+            for i in range(len(db_data)):
+                time_str = db_data[i][2]
+                time_str = time_str.replace("：", ":")
+                #time_format = datetime.strptime(time_str, '%H:%M')
+                now = datetime.now()
+                time_now = now.strftime('%H:%M')
+
+                if time_str >= time_now:
+                    msg = (
+                    db_data[i][1]
+                    + ":"
+                    + db_data[i][2]
+                    + "\n"
+                        )
+                    msg_list.append(msg)
+                elif time_str < time_now:
+                    sign = False
+            data.append(msg_list)
+            return [data]
+
+    except:
+        return [False,error, f"查询失败啦！好好看群公告的命令~梨花不喜欢和不看群公告的人说发！~"]
+
+
     
     
