@@ -283,7 +283,7 @@ run_car = on_command("桌游发车",block=True,priority=10)
 async def _(bot: Bot, event: MessageEvent,state:T_State):
     # 用state字典把这里获取的user_id保存
     state['userid'] = str(event.user_id)
-    await run_car.send("请输入发车信息")
+    await run_car.send("请输入发车信息，例如：\n《桌游名》\n【人数】X=X\n【教学】带教学\n【类型】美式/战斗【时长】教15分钟；玩60分钟\n【扩展】不带扩\n【难度】bgg(2.03 / 5)；集石(4/10)\n【房名】XXX\n【密码】XXX【语音】https://kook.top/XXX\nPS： 这是一辆车车的模板")
 
 @run_car.got("content")
 async def _(state:T_State,content: str = ArgPlainText("content"),prompt="模板"):
@@ -294,7 +294,7 @@ async def _(state:T_State,content: str = ArgPlainText("content"),prompt="模板"
     #runcar(car_id,content)
 
 @run_car.got("deadline")
-async def _(state:T_State,deadline: str = ArgPlainText("deadline")):
+async def _(bot: Bot,state:T_State,deadline: str = ArgPlainText("deadline")):
     # 获取刚刚获得的user_id，这样就能跨函数使用
     #car_id = str(state['userid'])
     state['deadline'] = deadline
@@ -305,8 +305,13 @@ async def _(state:T_State,deadline: str = ArgPlainText("deadline")):
         runcar(car_id,content,deadline)
     else:
         await run_car.finish("敲你脑袋哦！时间要正确填写！")
+    # -多群轮播发车信息功能
+    #group_list = await bot.get_group_list()
+    #for group in group_list:
+        #await bot.send_group_msg(group_id=group["group_id"], message=(content+"\n截止时间："+deadline))
     #runcar(car_id,content)
-### -发完车的广播功能未写
+
+
 
 # -----------------------查车-----------------------
 search_car = on_command("桌游查车",block=True,priority=11)
@@ -314,8 +319,54 @@ search_car = on_command("桌游查车",block=True,priority=11)
 async def _(bot: Bot, event: MessageEvent,state:T_State):
     # 用state字典把这里获取的user_id保存
     #state['userid'] = str(event.user_id)
-    msg = searchcar()
+    message_searchcar = searchcar()
+    #await search_car.finish(msg)
     ### -查车返回功能没写
+    # 消息发送列表
+    message_list = []
+    for car_list in message_searchcar:
+        # 如果idname0的状态为True，说明有这个信息
+        if car_list[0]:               
+            message = f"下面是存在的车车哦~"
+            message_list.append(message)
+            for onecar in car_list[1]:
+                message_list.append(onecar)
+        # 如果为false，说明没有这个信息
+        else:
+            message = car_list[1]+car_list[2]
+            message_list.append(message)
+
+
+
+    # 尝试发送
+    try:
+        if isinstance(event, PrivateMessageEvent):
+            msg = []
+            for msg in message_list:
+                #await chaxun.send(msg)
+                await search_car.send(msg)
+                await asyncio.sleep(0.5)
+        elif isinstance(event, GroupMessageEvent):
+            msgs = []
+            for msg in message_list:
+                msgs.append({
+                    'type': 'node',
+                    'data': {
+                        'name': "梨花酱",
+                        'uin': bot.self_id,
+                        'content': msg
+                    }
+                })
+            await bot.call_api('send_group_forward_msg', group_id=event.group_id, messages=msgs)
+        #若发送失败
+    except ActionFailed as F:
+        logger.warning(F)
+        await search_car.finish(
+            message=Message(f"不听不听，哄我两句再试试！"),
+            at_sender=True
+        )
+
+
 # -----------------------------------------------------
 
 # -----------------------cheche表每天删除-----------------------

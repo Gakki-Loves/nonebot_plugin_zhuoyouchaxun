@@ -199,7 +199,11 @@ def runcar(user_id,content,deadline):
     #提交事务
     conn.commit()
     conn.close()
-    
+     ### -发完车的广播功能未写
+
+
+
+
 def searchcar():
     data = []
     msg = []
@@ -229,10 +233,11 @@ def searchcar():
 
                 if time_str >= time_now:
                     msg = (
-                    db_data[i][1]
-                    + ":"
+                    "--------------------\n"
+                    +db_data[i][1]
+                    + "\n截止时间："
                     + db_data[i][2]
-                    + "\n"
+                    + "\n--------------------"
                         )
                     msg_list.append(msg)
                 elif time_str < time_now:
