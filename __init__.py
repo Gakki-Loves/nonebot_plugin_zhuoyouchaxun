@@ -424,6 +424,23 @@ async def _(session):
     if session.event.user_id in blacklist:
         await session.send('你已经被拉入黑名单，无法使用此命令')
         return
+      
+from nonebot import on_command, CommandSession
+
+@on_command('blacklist', permission=permission.GROUP_ADMIN)
+async def _(session: CommandSession):
+    user_id = session.current_arg_text.strip()
+    if not user_id:
+        session.finish('请输入要拉黑的用户 QQ 号')
+    try:
+        user_id = int(user_id)
+    except ValueError:
+        session.finish('请输入正确的用户 QQ 号')
+    if user_id in blacklist:
+        session.finish(f'QQ号为{user_id}的用户已经在黑名单中了')
+    blacklist.append(user_id)
+    session.finish(f'QQ号为{user_id}的用户已经被加入黑名单')
+
 # -----------------------------------------------------
 
 # -----------------------帮助菜单-----------------------
