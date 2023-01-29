@@ -387,7 +387,44 @@ async def _():
 
 # -----------------------------------------------------
 
+# -----------------------权限控制-----------------------
+# NoneBot中定义一个群员权限等级列表
+members_level = {
+    123456789: 1, # QQ号为123456789，权限等级为1
+    987654321: 2, # QQ号为987654321，权限等级为2
+}
+from nonebot import on_command
 
+#指令权限控制
+@on_command('command', permission=1)  # 只有权限等级为1的群员才能执行该命令
+async def _(session):
+    if members_level.get(session.event.user_id, 0) < 1: 
+        await session.send('你没有权限执行此命令')
+        return
+# -----------------------------------------------------
+
+# -----------------------权限控制-管理员单独版----------------------
+from nonebot import on_command, permission
+
+@on_command('command', permission=permission.GROUP_ADMIN)
+async def _(session):
+# -----------------------------------------------------
+
+# -----------------------黑名单-----------------------
+# NoneBot中定义一个黑名单列表
+blacklist = [
+    123456789,  # QQ号为123456789的用户被拉入黑名单
+    987654321,  # QQ号为987654321的用户被拉入黑名单
+]
+
+from nonebot import on_command
+
+@on_command('command')
+async def _(session):
+    if session.event.user_id in blacklist:
+        await session.send('你已经被拉入黑名单，无法使用此命令')
+        return
+# -----------------------------------------------------
 
 # -----------------------帮助菜单-----------------------
 #
