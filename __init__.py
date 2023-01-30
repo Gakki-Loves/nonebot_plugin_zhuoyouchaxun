@@ -28,8 +28,9 @@ import os
 from nonebot.typing import T_State
 from nonebot.log import logger
 from nonebot.exception import ActionFailed
+from nonebot.permission import SUPERUSER
+from .permission_manager import PermissionManager
 
-from nonebot import on_request
 from  nonebot . params  import  Arg ,  CommandArg ,  ArgPlainText 
 from .get_data import get_idname,get_BGinfo,get_tubaoname,get_tubaoinfo,runcar,searchcar
 
@@ -41,6 +42,8 @@ from .get_data import get_idname,get_BGinfo,get_tubaoname,get_tubaoinfo,runcar,s
 # █▄▄█─█░░▀░░┬░░▀░░█─█▄▄█
                             
 # -------------- 初始化变量 -------------------
+# 实例化权限管理
+pm = PermissionManager()
 # 读取桌游信息查询的正则表达
 try:
     chaxun_regex = repr(nonebot.get_driver().config.chaxun_regex)
@@ -58,7 +61,6 @@ except:
 
 
 
-
 # --------------发送查询信息部分-----------------
 # 桌游查询的正则表达式
 chaxun = on_regex(
@@ -71,7 +73,6 @@ chaxun = on_regex(
 @chaxun.handle()
 async def _(bot: Bot, event: MessageEvent,state: T_State):
     args = list(state["_matched_groups"])
-
     name = args[1]  #读取桌游名称
 
     #此时应该从用name查询数据库，返回所有包含name的桌游id和桌游name
@@ -291,7 +292,7 @@ async def _(state:T_State,content: str = ArgPlainText("content"),prompt="模板"
     #car_id = str(state['userid'])
     state['content'] = content
     await run_car.send("请输入截止时间~例如“21:50”")
-    #runcar(car_id,content)
+
 
 @run_car.got("deadline")
 async def _(bot: Bot,state:T_State,deadline: str = ArgPlainText("deadline")):
@@ -305,11 +306,18 @@ async def _(bot: Bot,state:T_State,deadline: str = ArgPlainText("deadline")):
         runcar(car_id,content,deadline)
     else:
         await run_car.finish("敲你脑袋哦！时间要正确填写！")
-    # -多群轮播发车信息功能
-    #group_list = await bot.get_group_list()
-    #for group in group_list:
-        #await bot.send_group_msg(group_id=group["group_id"], message=(content+"\n截止时间："+deadline))
-    #runcar(car_id,content)
+    # ------多群轮播发车信息功能
+    # 判断功能是否开启
+    cmd_broadcast = pm.search_broadcast_runcar()
+    
+    if cmd_broadcast == True:
+        group_list = await bot.get_group_list()
+        for group in group_list:
+            await bot.send_group_msg(group_id=group["group_id"], message=(content+"\n截止时间："+deadline))
+    elif cmd_broadcast == False:
+        await run_car.finish("多群轮播功能没有开启呦~梨花已经帮你记录到车库啦！")
+    else:
+        await run_car.finish("多群轮播设置不正确哦！")
 
 
 
@@ -406,3 +414,85 @@ async  def  GroupNewMember ( bot :  Bot ,  event :  GroupIncreaseNoticeEvent ):
     else:
         await bot.send_group_msg ( group_id =event . group_id ,  message =Message ( 
             MessageSegment . at ( event . user_id )  + MessageSegment . text ( "欢迎新桌友哦~我是桌游图书馆管理员梨花酱，请注意查看群公告内容~\n" ))) 
+
+
+
+
+# --------------- 权限管理部分 ---------------
+# -----多群轮播发车功能的开启与关闭
+broadcast_runcar = on_command("broadcast", permission=SUPERUSER, block=True, priority=10)
+# 分析是开是关
+@broadcast_runcar.handle()
+async def cmdArg(state: T_State,cmd:Message = CommandArg()):
+    if 'on' in str(cmd):
+        state['broadcast_runcar'] = True
+        pm.broadcast_runcar(state['broadcast_runcar'])
+        await broadcast_runcar.finish("多群轮播功能打开啦！")
+    elif 'off' in str(cmd):
+        state['broadcast_runcar'] = False
+        pm.broadcast_runcar(state['broadcast_runcar'])
+        await broadcast_runcar.finish("多群轮播功能关闭啦！")
+    else:
+        await broadcast_runcar.finish(f'无效参数: {cmd}, 请输入 on 或 off 为参数')
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# ----- 白名单添加与解除 -----
+open_setu = on_command("setu_wl", permission=SUPERUSER, block=True, priority=10)
+# 分析是新增还是删除
+@open_setu.handle()
+async def cmdArg(state: T_State,cmd:Message = CommandArg()):
+    if   'add' in str(cmd):
+        state['add_mode'] = True
+    elif 'del' in str(cmd):
+        state['add_mode'] = False
+    else:
+        await open_setu.finish(f'无效参数: {cmd}, 请输入 add 或 del 为参数')
+# 群聊部分自动获取sid
+@open_setu.handle()
+async def group(event:GroupMessageEvent, state: T_State):
+    state['sid'] = 'group_' + str(event.group_id)
+# 手动获取sid, 并调用对应的方法进行处理
+@open_setu.got('sid',prompt='请按照 “会话类型_会话id” 的格式输入目标对象, 例如:\ngroup_114514\nuser_1919810')
+async def _(state: T_State):
+    sid = str(state['sid'])
+    if not verifySid(sid):
+        await open_setu.reject(f"无效目标对象: {sid}")
+    await open_setu.finish(pm.UpdateWhiteList(sid,state['add_mode']))
+
+# ----- 黑名单添加与解除 -----
+ban_setu = on_command("setu_ban", permission=SUPERUSER, block=True, priority=10)
+# 分析是新增还是删除
+@ban_setu.handle()
+async def cmdArg(state: T_State,cmd:Message = CommandArg()):
+    if   'add' in str(cmd):
+        state['add_mode'] = True
+    elif 'del' in str(cmd):
+        state['add_mode'] = False
+    else:
+        await ban_setu.finish(f'无效参数: {cmd}, 请输入 add 或 del 为参数')
+# 群聊部分自动获取sid
+@ban_setu.handle()
+async def group(event:GroupMessageEvent, state: T_State):
+    state['sid'] = 'group_' + str(event.group_id)
+# 手动获取sid, 并调用对应的方法进行处理
+@ban_setu.got('sid',prompt='请按照 “会话类型_会话id” 的格式输入目标对象, 例如:\ngroup_114514\nuser_1919810')
+async def _(state: T_State):
+    sid = str(state['sid'])
+    if not verifySid(sid):
+        await ban_setu.reject(f"无效目标对象: {sid}")
+    await ban_setu.finish(pm.UpdateBanList(sid,state['add_mode']))
+    
