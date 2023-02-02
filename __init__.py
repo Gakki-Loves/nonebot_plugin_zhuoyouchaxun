@@ -66,7 +66,7 @@ def sessionId(event:MessageEvent):
     if isinstance(event, GroupMessageEvent):
         sessionId = 'group_' + str(event.group_id)
     return sessionId
-    
+
 # 分析sdssionId是否正确
 def verifySid(sid:str):
     try:
@@ -87,9 +87,20 @@ chaxun = on_regex(
     block=True
 )
 
+# 先查询一下是哪个群
+@chaxun.handle()
+async def group(event:GroupMessageEvent, state: T_State):
+    state['sid'] = 'group_' + str(event.group_id)
+
 #响应器处理
 @chaxun.handle()
 async def _(bot: Bot, event: MessageEvent,state: T_State):
+
+    # 功能开启判定
+    cmd_search_boardgame = pm.Query_search_boardgame(state['sid'])
+
+    if cmd_search_boardgame == False:
+        await chaxun.finish("桌游查车功能没有开启哦~")
     args = list(state["_matched_groups"])
     name = args[1]  #读取桌游名称
 
@@ -325,7 +336,7 @@ async def _(bot: Bot,state:T_State,event: GroupMessageEvent,deadline: str = ArgP
     else:
         await run_car.finish("敲你脑袋哦！时间要正确填写！")
     # ------多群轮播发车信息功能
-    cmd_broadcast = pm.search_broadcast_runcar()
+    cmd_broadcast = pm.Query_broadcast_runcar()
     group_list = await bot.get_group_list()
     # 判断是否为主群
     group_id = str(event.group_id)
@@ -468,4 +479,169 @@ async def cmdArg(state: T_State,cmd:Message = CommandArg()):
         await broadcast_runcar.finish("多群轮播功能关闭啦！")
     else:
         await broadcast_runcar.finish(f'无效参数: {cmd}, 请输入 on 或 off 为参数')
+
+
+# ------------------------------------测试功能
+# ----- 白名单添加与解除 -----
+lihua_whitelist = on_command("lihua_wl", permission=SUPERUSER, block=True, priority=10)
+# 分析是新增还是删除
+@lihua_whitelist.handle()
+async def cmdArg(state: T_State,cmd:Message = CommandArg()):
+    if   'add' in str(cmd):
+        state['add_mode'] = True
+    elif 'del' in str(cmd):
+        state['add_mode'] = False
+    else:
+        await lihua_whitelist.finish(f'无效参数: {cmd}, 请输入 add 或 del 为参数')
+# 群聊部分自动获取sid
+@lihua_whitelist.handle()
+async def group(event:GroupMessageEvent, state: T_State):
+    state['sid'] = 'group_' + str(event.group_id)
+# 手动获取sid, 并调用对应的方法进行处理
+@lihua_whitelist.got('sid',prompt='请按照 “会话类型_会话id” 的格式输入目标对象, 例如:\ngroup_114514\nuser_1919810')
+async def _(state: T_State):
+    sid = str(state['sid'])
+    if not verifySid(sid):
+        await lihua_whitelist.reject(f"无效目标对象: {sid}")
+    await lihua_whitelist.finish(pm.UpdateWhiteList(sid,state['add_mode']))
+
+# ----- 黑名单添加与解除 -----
+lihua_ban = on_command("lihua_ban", permission=SUPERUSER, block=True, priority=10)
+# 分析是新增还是删除
+@lihua_ban.handle()
+async def cmdArg(state: T_State,cmd:Message = CommandArg()):
+    if   'add' in str(cmd):
+        state['add_mode'] = True
+    elif 'del' in str(cmd):
+        state['add_mode'] = False
+    else:
+        await lihua_ban.finish(f'无效参数: {cmd}, 请输入 add 或 del 为参数')
+# 群聊部分自动获取sid
+@lihua_ban.handle()
+async def group(event:GroupMessageEvent, state: T_State):
+    state['sid'] = 'group_' + str(event.group_id)
+# 手动获取sid, 并调用对应的方法进行处理
+@lihua_ban.got('sid',prompt='请按照 “会话类型_会话id” 的格式输入目标对象, 例如:\ngroup_114514\nuser_1919810')
+async def _(state: T_State):
+    sid = str(state['sid'])
+    if not verifySid(sid):
+        await lihua_ban.reject(f"无效目标对象: {sid}")
+    await lihua_ban.finish(pm.UpdateBanList(sid,state['add_mode']))
+
+
+# ------- 桌游查询功能开启与关闭 -------
+search_boardgame = on_command("lihua_search_boardgame", permission=SUPERUSER, block=True, priority=10)
+# 分析是新增还是删除
+@search_boardgame.handle()
+async def cmdArg(state: T_State,cmd:Message = CommandArg()):
+    if   'on' in str(cmd):
+        state['search_boardgame'] = True
+    elif 'off' in str(cmd):
+        state['search_boardgame'] = False
+    else:
+        await search_boardgame.finish(f'无效参数: {cmd}, 请输入 on 或 off 为参数')
+# 群聊部分自动获取sid
+@search_boardgame.handle()
+async def group(event:GroupMessageEvent, state: T_State):
+    state['sid'] = 'group_' + str(event.group_id)
+# 手动获取sid, 并调用对应的方法进行处理
+@search_boardgame.got('sid',prompt='请按照 “会话类型_会话id” 的格式输入目标对象, 例如:\ngroup_114514\nuser_1919810')
+async def _(state: T_State):
+    sid = str(state['sid'])
+    if not verifySid(sid):
+        await search_boardgame.reject(f"无效目标对象: {sid}")
+    await search_boardgame.finish(pm.Update_search_boardgame(sid,state['search_boardgame']))
+
+# ------- 图包查询功能开启与关闭 -------
+search_mod = on_command("lihua_search_mod", permission=SUPERUSER, block=True, priority=10)
+# 分析是新增还是删除
+@search_mod.handle()
+async def cmdArg(state: T_State,cmd:Message = CommandArg()):
+    if   'on' in str(cmd):
+        state['search_mod'] = True
+    elif 'off' in str(cmd):
+        state['search_mod'] = False
+    else:
+        await search_mod.finish(f'无效参数: {cmd}, 请输入 on 或 off 为参数')
+# 群聊部分自动获取sid
+@search_mod.handle()
+async def group(event:GroupMessageEvent, state: T_State):
+    state['sid'] = 'group_' + str(event.group_id)
+# 手动获取sid, 并调用对应的方法进行处理
+@search_mod.got('sid',prompt='请按照 “会话类型_会话id” 的格式输入目标对象, 例如:\ngroup_114514\nuser_1919810')
+async def _(state: T_State):
+    sid = str(state['sid'])
+    if not verifySid(sid):
+        await search_mod.reject(f"无效目标对象: {sid}")
+    await search_mod.finish(pm.Update_search_mod(sid,state['search_mod']))
+
+# ------- 桌游发车功能开启与关闭 -------
+run_car = on_command("lihua_run_car", permission=SUPERUSER, block=True, priority=10)
+# 分析是新增还是删除
+@run_car.handle()
+async def cmdArg(state: T_State,cmd:Message = CommandArg()):
+    if   'on' in str(cmd):
+        state['run_car'] = True
+    elif 'off' in str(cmd):
+        state['run_car'] = False
+    else:
+        await run_car.finish(f'无效参数: {cmd}, 请输入 on 或 off 为参数')
+# 群聊部分自动获取sid
+@run_car.handle()
+async def group(event:GroupMessageEvent, state: T_State):
+    state['sid'] = 'group_' + str(event.group_id)
+# 手动获取sid, 并调用对应的方法进行处理
+@run_car.got('sid',prompt='请按照 “会话类型_会话id” 的格式输入目标对象, 例如:\ngroup_114514\nuser_1919810')
+async def _(state: T_State):
+    sid = str(state['sid'])
+    if not verifySid(sid):
+        await run_car.reject(f"无效目标对象: {sid}")
+    await run_car.finish(pm.Update_run_car(sid,state['run_car']))
+
+# ------- 桌游查车功能开启与关闭 -------
+search_car = on_command("lihua_search_car", permission=SUPERUSER, block=True, priority=10)
+# 分析是新增还是删除
+@search_car.handle()
+async def cmdArg(state: T_State,cmd:Message = CommandArg()):
+    if   'on' in str(cmd):
+        state['search_car'] = True
+    elif 'off' in str(cmd):
+        state['search_car'] = False
+    else:
+        await search_car.finish(f'无效参数: {cmd}, 请输入 on 或 off 为参数')
+# 群聊部分自动获取sid
+@search_car.handle()
+async def group(event:GroupMessageEvent, state: T_State):
+    state['sid'] = 'group_' + str(event.group_id)
+# 手动获取sid, 并调用对应的方法进行处理
+@search_car.got('sid',prompt='请按照 “会话类型_会话id” 的格式输入目标对象, 例如:\ngroup_114514\nuser_1919810')
+async def _(state: T_State):
+    sid = str(state['sid'])
+    if not verifySid(sid):
+        await search_car.reject(f"无效目标对象: {sid}")
+    await search_car.finish(pm.Update_search_car(sid,state['search_car']))
+
+# ------- 是否发送多群轮播车主信息开启与关闭 -------
+broadcastruncar = on_command("lihua_broadcastruncar", permission=SUPERUSER, block=True, priority=10)
+# 分析是新增还是删除
+@broadcastruncar.handle()
+async def cmdArg(state: T_State,cmd:Message = CommandArg()):
+    if   'on' in str(cmd):
+        state['broadcastruncar'] = True
+    elif 'off' in str(cmd):
+        state['broadcastruncar'] = False
+    else:
+        await broadcastruncar.finish(f'无效参数: {cmd}, 请输入 on 或 off 为参数')
+# 群聊部分自动获取sid
+@broadcastruncar.handle()
+async def group(event:GroupMessageEvent, state: T_State):
+    state['sid'] = 'group_' + str(event.group_id)
+# 手动获取sid, 并调用对应的方法进行处理
+@broadcastruncar.got('sid',prompt='请按照 “会话类型_会话id” 的格式输入目标对象, 例如:\ngroup_114514\nuser_1919810')
+async def _(state: T_State):
+    sid = str(state['sid'])
+    if not verifySid(sid):
+        await broadcastruncar.reject(f"无效目标对象: {sid}")
+    await broadcastruncar.finish(pm.Update_search_boardgame(sid,state['broadcastruncar']))
+
 
