@@ -21,8 +21,9 @@ from nonebot.adapters.onebot.v11.message import Message
 import nonebot
 from nonebot.adapters.onebot.v11 import (GROUP, PRIVATE_FRIEND, Bot,
                                          GroupMessageEvent, Message,
-                                         MessageEvent, MessageSegment,
+                                         MessageEvent,MessageSegment,
                                          PrivateMessageEvent,GroupIncreaseNoticeEvent)
+from nonebot.adapters.onebot.v11 import GROUP_ADMIN, GROUP_OWNER
 import sqlite3
 from pathlib import Path
 import os
@@ -309,6 +310,7 @@ async def _(bot:Bot,event:MessageEvent,state: T_State,tubao_id: str = ArgPlainTe
 
 # ----------------------发车------------------------------
 run_car = on_command("桌游发车",block=True,priority=10)
+
 @run_car.handle()
 async def _(bot: Bot, event: MessageEvent,state:T_State):
     # 用state字典把这里获取的user_id保存
@@ -336,15 +338,27 @@ async def _(bot: Bot,state:T_State,event: GroupMessageEvent,deadline: str = ArgP
     else:
         await run_car.finish("敲你脑袋哦！时间要正确填写！")
     # ------多群轮播发车信息功能
-    cmd_broadcast = pm.Query_broadcast_runcar()
+    cmd_broad_cast = pm.Query_broadcast_runcar()
+    #cmd_broadcast = pm.Query_broadcastruncar(state['sid'])
     group_list = await bot.get_group_list()
     # 判断是否为主群
     group_id = str(event.group_id)
     if group_id == "177053575":
-        if cmd_broadcast == True:
+        if cmd_broad_cast == True:
+            # 这里要判断各个群是否开启了接收多群轮播功能
+            # 没开的就不发送开车信息
+            # 本来应该写个函数的
+            # 但是我懒
+            # 所以就直接写在循环里了
+            # 罪过罪过
             for group in group_list:
-                await bot.send_group_msg(group_id=group["group_id"], message=(content+"\n截止时间："+deadline))
-        elif cmd_broadcast == False:
+                group_id=group["group_id"]
+                sessionId = 'group_' + str(group_id)
+                # 找到这个群的多群轮播功能开了没
+                cmd_broadcast = pm.Query_broadcastruncar(sessionId)
+                if cmd_broadcast:
+                    await bot.send_group_msg(group_id=group["group_id"], message=(content+"\n截止时间："+deadline))
+        elif cmd_broad_cast == False:
             await run_car.finish("多群轮播功能没有开启呦~梨花已经帮你记录到车库啦！")
         else:
             await run_car.finish("多群轮播设置不正确哦！")
@@ -483,7 +497,7 @@ async def cmdArg(state: T_State,cmd:Message = CommandArg()):
 
 # ------------------------------------测试功能
 # ----- 白名单添加与解除 -----
-lihua_whitelist = on_command("lihua_wl", permission=SUPERUSER, block=True, priority=10)
+lihua_whitelist = on_command("lihua_wl", permission=GROUP_OWNER, block=True, priority=10)
 # 分析是新增还是删除
 @lihua_whitelist.handle()
 async def cmdArg(state: T_State,cmd:Message = CommandArg()):
@@ -506,7 +520,7 @@ async def _(state: T_State):
     await lihua_whitelist.finish(pm.UpdateWhiteList(sid,state['add_mode']))
 
 # ----- 黑名单添加与解除 -----
-lihua_ban = on_command("lihua_ban", permission=SUPERUSER, block=True, priority=10)
+lihua_ban = on_command("lihua_ban", permission=GROUP_OWNER, block=True, priority=10)
 # 分析是新增还是删除
 @lihua_ban.handle()
 async def cmdArg(state: T_State,cmd:Message = CommandArg()):
@@ -530,7 +544,7 @@ async def _(state: T_State):
 
 
 # ------- 桌游查询功能开启与关闭 -------
-search_boardgame = on_command("lihua_search_boardgame", permission=SUPERUSER, block=True, priority=10)
+search_boardgame = on_command("lihua_search_boardgame", permission=GROUP_OWNER, block=True, priority=10)
 # 分析是新增还是删除
 @search_boardgame.handle()
 async def cmdArg(state: T_State,cmd:Message = CommandArg()):
@@ -553,7 +567,7 @@ async def _(state: T_State):
     await search_boardgame.finish(pm.Update_search_boardgame(sid,state['search_boardgame']))
 
 # ------- 图包查询功能开启与关闭 -------
-search_mod = on_command("lihua_search_mod", permission=SUPERUSER, block=True, priority=10)
+search_mod = on_command("lihua_search_mod", permission=GROUP_OWNER, block=True, priority=10)
 # 分析是新增还是删除
 @search_mod.handle()
 async def cmdArg(state: T_State,cmd:Message = CommandArg()):
@@ -576,7 +590,7 @@ async def _(state: T_State):
     await search_mod.finish(pm.Update_search_mod(sid,state['search_mod']))
 
 # ------- 桌游发车功能开启与关闭 -------
-run_car = on_command("lihua_run_car", permission=SUPERUSER, block=True, priority=10)
+run_car = on_command("lihua_run_car", permission=GROUP_OWNER, block=True, priority=10)
 # 分析是新增还是删除
 @run_car.handle()
 async def cmdArg(state: T_State,cmd:Message = CommandArg()):
@@ -599,7 +613,7 @@ async def _(state: T_State):
     await run_car.finish(pm.Update_run_car(sid,state['run_car']))
 
 # ------- 桌游查车功能开启与关闭 -------
-search_car = on_command("lihua_search_car", permission=SUPERUSER, block=True, priority=10)
+search_car = on_command("lihua_search_car", permission=GROUP_OWNER, block=True, priority=10)
 # 分析是新增还是删除
 @search_car.handle()
 async def cmdArg(state: T_State,cmd:Message = CommandArg()):
@@ -622,7 +636,7 @@ async def _(state: T_State):
     await search_car.finish(pm.Update_search_car(sid,state['search_car']))
 
 # ------- 是否发送多群轮播车主信息开启与关闭 -------
-broadcastruncar = on_command("lihua_broadcastruncar", permission=SUPERUSER, block=True, priority=10)
+broadcastruncar = on_command("lihua_broadcastruncar", permission=GROUP_OWNER, block=True, priority=10)
 # 分析是新增还是删除
 @broadcastruncar.handle()
 async def cmdArg(state: T_State,cmd:Message = CommandArg()):
@@ -642,6 +656,6 @@ async def _(state: T_State):
     sid = str(state['sid'])
     if not verifySid(sid):
         await broadcastruncar.reject(f"无效目标对象: {sid}")
-    await broadcastruncar.finish(pm.Update_search_boardgame(sid,state['broadcastruncar']))
+    await broadcastruncar.finish(pm.Update_broadcastruncar(sid,state['broadcastruncar']))
 
 
