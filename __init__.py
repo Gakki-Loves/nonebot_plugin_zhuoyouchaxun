@@ -659,3 +659,8 @@ async def _(state: T_State):
     await broadcastruncar.finish(pm.Update_broadcastruncar(sid,state['broadcastruncar']))
 
 
+# ----------------娱乐功能
+hitme = on_command("梨花揍我",block=True,priority=90)
+@hitme.handle()
+async def _(bot: Bot, event: Event):
+    await hitme.finish(Message(f'[CQ:at,qq={event.get_user_id()}]哥哥说不可以跟hentai说话（嫌弃）'))
