@@ -88,20 +88,20 @@ chaxun = on_regex(
     block=True
 )
 
-# 先查询一下是哪个群
-@chaxun.handle()
-async def group(event:GroupMessageEvent, state: T_State):
-    state['sid'] = 'group_' + str(event.group_id)
-
 #响应器处理
 @chaxun.handle()
 async def _(bot: Bot, event: MessageEvent,state: T_State):
 
     # 功能开启判定
+    if isinstance(event, PrivateMessageEvent):
+        state['sid'] = 'user_' + str(event.user_id)
+    if isinstance(event, GroupMessageEvent):
+        state['sid'] = 'group_' + str(event.group_id)
     cmd_search_boardgame = pm.Query_search_boardgame(state['sid'])
-
     if cmd_search_boardgame == False:
-        await chaxun.finish("桌游查车功能没有开启哦~")
+        await chaxun.finish("桌游查询功能没有开启哦~")
+
+    # ---逻辑部分
     args = list(state["_matched_groups"])
     name = args[1]  #读取桌游名称
 
@@ -218,6 +218,21 @@ tubao = on_regex(
 )
 @tubao.handle()
 async def _(bot: Bot, event: MessageEvent,state: T_State):
+
+    # 功能开启判定
+    if isinstance(event, PrivateMessageEvent):
+        state['sid'] = 'user_' + str(event.user_id)
+    if isinstance(event, GroupMessageEvent):
+        state['sid'] = 'group_' + str(event.group_id)
+    cmd_search_boardgame = pm.Query_search_mod(state['sid'])
+    if cmd_search_boardgame == False:
+        await chaxun.finish("图包查询功能没有开启哦~")
+
+
+
+
+
+
     args = list(state["_matched_groups"])
     tubao_name = args[1]  #读取桌游名称
 
@@ -313,6 +328,16 @@ run_car = on_command("桌游发车",block=True,priority=10)
 
 @run_car.handle()
 async def _(bot: Bot, event: MessageEvent,state:T_State):
+
+    # 功能开启判定
+    if isinstance(event, PrivateMessageEvent):
+        state['sid'] = 'user_' + str(event.user_id)
+    if isinstance(event, GroupMessageEvent):
+        state['sid'] = 'group_' + str(event.group_id)
+    cmd_search_boardgame = pm.Query_run_car(state['sid'])
+    if cmd_search_boardgame == False:
+        await chaxun.finish("桌游发车功能没有开启哦~")
+
     # 用state字典把这里获取的user_id保存
     state['userid'] = str(event.user_id)
     await run_car.send("请输入发车信息，例如：\n《桌游名》\n【人数】X=X\n【教学】带教学\n【类型】美式/战斗【时长】教15分钟；玩60分钟\n【扩展】不带扩\n【难度】bgg(2.03 / 5)；集石(4/10)\n【房名】XXX\n【密码】XXX【语音】https://kook.top/XXX\nPS： 这是一辆车车的模板")
@@ -371,11 +396,20 @@ async def _(bot: Bot,state:T_State,event: GroupMessageEvent,deadline: str = ArgP
 search_car = on_command("桌游查车",block=True,priority=11)
 @search_car.handle()
 async def _(bot: Bot, event: MessageEvent,state:T_State):
+
+    # 功能开启判定
+    if isinstance(event, PrivateMessageEvent):
+        state['sid'] = 'user_' + str(event.user_id)
+    if isinstance(event, GroupMessageEvent):
+        state['sid'] = 'group_' + str(event.group_id)
+    cmd_search_boardgame = pm.Query_search_car(state['sid'])
+    if cmd_search_boardgame == False:
+        await chaxun.finish("桌游查车功能没有开启哦~")
+
+
+
     # 用state字典把这里获取的user_id保存
-    #state['userid'] = str(event.user_id)
     message_searchcar = searchcar()
-    #await search_car.finish(msg)
-    ### -查车返回功能没写
     # 消息发送列表
     message_list = []
     for car_list in message_searchcar:
@@ -439,14 +473,49 @@ def clear_table():
 async def _():
     clear_table()
 
-# -----------------------------------------------------
-
-
 
 # -----------------------帮助菜单-----------------------
-#
-# -----------------------------------------------------
+# 普通命令
+lihuahelp = on_command("梨花命令",block=True, priority=10)
+@lihuahelp.handle()
+async def _():
+    help_msg = """梨花的使用命令:
+    桌游功能：          
+    ‘桌游查询 XXX’  查询XXX桌游信息
+    ‘图包查询 XXX’  查询XXX图包信息
+    ‘桌游查车’      查询正在进行的桌游车
+    ‘桌游发车’      你来开一辆车
 
+    其他功能：
+    ‘XX天气’        查询XX未来几天的天气
+    ‘占卜/塔罗牌’   占卜功能
+    ‘人生重开’      人生重开模拟器
+    ‘疯狂星期四’    随机发送疯狂星期四文案
+    ‘.send +内容’   可以直接和bot作者对话，提出意见建议
+    """
+    await lihuahelp.finish(help_msg)
+
+# 管理员命令
+lihua_cmdhelp = on_command("梨花管理员命令",permission=GROUP_ADMIN|GROUP_ADMIN|SUPERUSER,block=True, priority=10)
+@lihua_cmdhelp.handle()
+async def _():
+    help_msg = """梨花的管理员命令:
+    白名单管理：
+    lihua_wl add  添加会话至白名单
+    lihua_wl del  移出会话自白名单
+    
+    黑名单管理：    
+    lihua_wl add  添加会话至黑名单
+    lihua_wl del  移出会话自黑名单
+
+    桌游功能权限：
+    lihua_search_boardgame on/off  开启/关闭桌游查询
+    lihua_search_mod on/off        开启/关闭图包查询
+    lihua_run_car on/off           开启/关闭桌游发车
+    lihua_search_car on/off        开启/关闭桌游查车
+    lihua_broadcastruncar on/off   开启/关闭多群轮播
+    """
+    await lihua_cmdhelp.finish(help_msg)
 
 # ------------------欢迎新群友----------------
 # -初始化
@@ -494,10 +563,8 @@ async def cmdArg(state: T_State,cmd:Message = CommandArg()):
     else:
         await broadcast_runcar.finish(f'无效参数: {cmd}, 请输入 on 或 off 为参数')
 
-
-# ------------------------------------测试功能
 # ----- 白名单添加与解除 -----
-lihua_whitelist = on_command("lihua_wl", permission=GROUP_OWNER, block=True, priority=10)
+lihua_whitelist = on_command("lihua_wl", permission=GROUP_ADMIN, block=True, priority=10)
 # 分析是新增还是删除
 @lihua_whitelist.handle()
 async def cmdArg(state: T_State,cmd:Message = CommandArg()):
@@ -520,7 +587,7 @@ async def _(state: T_State):
     await lihua_whitelist.finish(pm.UpdateWhiteList(sid,state['add_mode']))
 
 # ----- 黑名单添加与解除 -----
-lihua_ban = on_command("lihua_ban", permission=GROUP_OWNER, block=True, priority=10)
+lihua_ban = on_command("lihua_ban", permission=GROUP_ADMIN, block=True, priority=10)
 # 分析是新增还是删除
 @lihua_ban.handle()
 async def cmdArg(state: T_State,cmd:Message = CommandArg()):
@@ -544,7 +611,7 @@ async def _(state: T_State):
 
 
 # ------- 桌游查询功能开启与关闭 -------
-search_boardgame = on_command("lihua_search_boardgame", permission=GROUP_OWNER, block=True, priority=10)
+search_boardgame = on_command("lihua_search_boardgame", permission=GROUP_ADMIN, block=True, priority=10)
 # 分析是新增还是删除
 @search_boardgame.handle()
 async def cmdArg(state: T_State,cmd:Message = CommandArg()):
@@ -567,7 +634,7 @@ async def _(state: T_State):
     await search_boardgame.finish(pm.Update_search_boardgame(sid,state['search_boardgame']))
 
 # ------- 图包查询功能开启与关闭 -------
-search_mod = on_command("lihua_search_mod", permission=GROUP_OWNER, block=True, priority=10)
+search_mod = on_command("lihua_search_mod", permission=GROUP_ADMIN, block=True, priority=10)
 # 分析是新增还是删除
 @search_mod.handle()
 async def cmdArg(state: T_State,cmd:Message = CommandArg()):
@@ -590,7 +657,7 @@ async def _(state: T_State):
     await search_mod.finish(pm.Update_search_mod(sid,state['search_mod']))
 
 # ------- 桌游发车功能开启与关闭 -------
-run_car = on_command("lihua_run_car", permission=GROUP_OWNER, block=True, priority=10)
+run_car = on_command("lihua_run_car", permission=GROUP_ADMIN, block=True, priority=10)
 # 分析是新增还是删除
 @run_car.handle()
 async def cmdArg(state: T_State,cmd:Message = CommandArg()):
@@ -613,7 +680,7 @@ async def _(state: T_State):
     await run_car.finish(pm.Update_run_car(sid,state['run_car']))
 
 # ------- 桌游查车功能开启与关闭 -------
-search_car = on_command("lihua_search_car", permission=GROUP_OWNER, block=True, priority=10)
+search_car = on_command("lihua_search_car", permission=GROUP_ADMIN, block=True, priority=10)
 # 分析是新增还是删除
 @search_car.handle()
 async def cmdArg(state: T_State,cmd:Message = CommandArg()):
@@ -636,7 +703,7 @@ async def _(state: T_State):
     await search_car.finish(pm.Update_search_car(sid,state['search_car']))
 
 # ------- 是否发送多群轮播车主信息开启与关闭 -------
-broadcastruncar = on_command("lihua_broadcastruncar", permission=GROUP_OWNER, block=True, priority=10)
+broadcastruncar = on_command("lihua_broadcastruncar", permission=GROUP_ADMIN, block=True, priority=10)
 # 分析是新增还是删除
 @broadcastruncar.handle()
 async def cmdArg(state: T_State,cmd:Message = CommandArg()):
@@ -657,6 +724,15 @@ async def _(state: T_State):
     if not verifySid(sid):
         await broadcastruncar.reject(f"无效目标对象: {sid}")
     await broadcastruncar.finish(pm.Update_broadcastruncar(sid,state['broadcastruncar']))
+
+
+
+
+
+
+
+
+
 
 
 # ----------------娱乐功能
