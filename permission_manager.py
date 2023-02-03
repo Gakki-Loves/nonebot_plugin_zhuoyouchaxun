@@ -50,7 +50,7 @@ class PermissionManager:
         try: 
             self.LihuaBot_cfg_path  = str(Path(nonebot.get_driver().config.LihuaBot_cfg_path,'LihuaBot_cfg.json'))
         except:
-            self.LihuaBot_cfg_path  = 'data/LihuaBot/text1_cfg.json'
+            self.LihuaBot_cfg_path  = 'data/LihuaBot/LihuaBot_cfg.json'
         try: 
             self.broadcast_runner             = int(nonebot.get_driver().config.broadcast_runner)
         except:
