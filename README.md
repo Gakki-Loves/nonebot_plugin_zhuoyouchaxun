@@ -1,3 +1,4 @@
+
 <p align="center">
   <a href="https://v2.nonebot.dev/"><img src="https://v2.nonebot.dev/logo.png" width="200" height="200" alt="nonebot"></a>
 </p>
@@ -39,7 +40,7 @@ _✨ NoneBot 桌游查询 ✨_
 - lihua_search_car on/off
 - lihua_broadcastruncar on/off
 
-ps：目前resource内的数据库为测试数据库，仅有2k条信息，查不到桌游很正常
+
 
 ## ToDo
 - 增加上传图包功能

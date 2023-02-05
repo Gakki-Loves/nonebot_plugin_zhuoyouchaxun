@@ -344,7 +344,7 @@ async def _(bot: Bot, event: MessageEvent,state:T_State):
 
     # 用state字典把这里获取的user_id保存
     state['userid'] = str(event.user_id)
-    await run_car.send("请输入发车信息，例如：\n《桌游名》\n【人数】X=X\n【教学】带教学\n【类型】美式/战斗\n【时长】教15分钟；玩60分钟\n【扩展】不带扩\n【难度】bgg(2.03 / 5)；集石(4/10)\n【房名】XXX\n【密码】XXX\n【语音】https://kook.top/XXX\nPS： 这是一辆车车的模板~")
+    await run_car.send("请输入发车信息，例如：\n《桌游名》\n【人数】X=X\n【教学】带教学\n【类型】美式/战斗\n【时长】教15分钟；玩60分钟\n【扩展】不带扩\n【难度】bgg(2.03 / 5)；集石(4/10)\n【房名】XXX\n【密码】XXX\n【语音】https://kook.top/XXX\nPS： 这是一辆车车的模板")
 
 @run_car.got("content")
 async def _(state:T_State,content: str = ArgPlainText("content"),prompt="模板"):
@@ -500,7 +500,7 @@ async def _():
     await lihuahelp.finish(help_msg)
 
 # 管理员命令
-lihua_cmdhelp = on_command("梨花管理员命令",permission=GROUP_ADMIN|GROUP_ADMIN|SUPERUSER,block=True, priority=10)
+lihua_cmdhelp = on_command("梨花管理员命令",permission=GROUP_ADMIN|GROUP_OWNER|SUPERUSER,block=True, priority=10)
 @lihua_cmdhelp.handle()
 async def _():
     help_msg = """梨花的管理员命令:
@@ -568,7 +568,7 @@ async def cmdArg(state: T_State,cmd:Message = CommandArg()):
         await broadcast_runcar.finish(f'无效参数: {cmd}, 请输入 on 或 off 为参数')
 
 # ----- 白名单添加与解除 -----
-lihua_whitelist = on_command("lihua_wl", permission=GROUP_ADMIN, block=True, priority=10)
+lihua_whitelist = on_command("lihua_wl", permission=GROUP_ADMIN|GROUP_OWNER|SUPERUSER, block=True, priority=10)
 # 分析是新增还是删除
 @lihua_whitelist.handle()
 async def cmdArg(state: T_State,cmd:Message = CommandArg()):
@@ -591,7 +591,7 @@ async def _(state: T_State):
     await lihua_whitelist.finish(pm.UpdateWhiteList(sid,state['add_mode']))
 
 # ----- 黑名单添加与解除 -----
-lihua_ban = on_command("lihua_ban", permission=GROUP_ADMIN, block=True, priority=10)
+lihua_ban = on_command("lihua_ban", permission=GROUP_ADMIN|GROUP_OWNER|SUPERUSER, block=True, priority=10)
 # 分析是新增还是删除
 @lihua_ban.handle()
 async def cmdArg(state: T_State,cmd:Message = CommandArg()):
@@ -615,7 +615,7 @@ async def _(state: T_State):
 
 
 # ------- 桌游查询功能开启与关闭 -------
-search_boardgame = on_command("lihua_search_boardgame", permission=GROUP_ADMIN, block=True, priority=10)
+search_boardgame = on_command("lihua_search_boardgame", permission=GROUP_ADMIN|GROUP_OWNER|SUPERUSER, block=True, priority=10)
 # 分析是新增还是删除
 @search_boardgame.handle()
 async def cmdArg(state: T_State,cmd:Message = CommandArg()):
@@ -638,7 +638,7 @@ async def _(state: T_State):
     await search_boardgame.finish(pm.Update_search_boardgame(sid,state['search_boardgame']))
 
 # ------- 图包查询功能开启与关闭 -------
-search_mod = on_command("lihua_search_mod", permission=GROUP_ADMIN, block=True, priority=10)
+search_mod = on_command("lihua_search_mod", permission=GROUP_ADMIN|GROUP_OWNER|SUPERUSER, block=True, priority=10)
 # 分析是新增还是删除
 @search_mod.handle()
 async def cmdArg(state: T_State,cmd:Message = CommandArg()):
@@ -661,7 +661,7 @@ async def _(state: T_State):
     await search_mod.finish(pm.Update_search_mod(sid,state['search_mod']))
 
 # ------- 桌游发车功能开启与关闭 -------
-run_car = on_command("lihua_run_car", permission=GROUP_ADMIN, block=True, priority=10)
+run_car = on_command("lihua_run_car", permission=GROUP_ADMIN|GROUP_OWNER|SUPERUSER, block=True, priority=10)
 # 分析是新增还是删除
 @run_car.handle()
 async def cmdArg(state: T_State,cmd:Message = CommandArg()):
@@ -684,7 +684,7 @@ async def _(state: T_State):
     await run_car.finish(pm.Update_run_car(sid,state['run_car']))
 
 # ------- 桌游查车功能开启与关闭 -------
-search_car = on_command("lihua_search_car", permission=GROUP_ADMIN, block=True, priority=10)
+search_car = on_command("lihua_search_car", permission=GROUP_ADMIN|GROUP_OWNER|SUPERUSER, block=True, priority=10)
 # 分析是新增还是删除
 @search_car.handle()
 async def cmdArg(state: T_State,cmd:Message = CommandArg()):
@@ -707,7 +707,7 @@ async def _(state: T_State):
     await search_car.finish(pm.Update_search_car(sid,state['search_car']))
 
 # ------- 是否发送多群轮播车主信息开启与关闭 -------
-broadcastruncar = on_command("lihua_broadcastruncar", permission=GROUP_ADMIN, block=True, priority=10)
+broadcastruncar = on_command("lihua_broadcastruncar", permission=GROUP_ADMIN|GROUP_OWNER|SUPERUSER, block=True, priority=10)
 # 分析是新增还是删除
 @broadcastruncar.handle()
 async def cmdArg(state: T_State,cmd:Message = CommandArg()):
@@ -743,4 +743,7 @@ async def _(state: T_State):
 hitme = on_command("梨花揍我",block=True,priority=90)
 @hitme.handle()
 async def _(bot: Bot, event: Event):
-    await hitme.finish(Message(f'[CQ:at,qq={event.get_user_id()}]哥哥说不可以跟hentai说话（嫌弃）'))
+    if event.get_user_id() == "739150373":
+        await hitme.finish(Message(f'[CQ:at,qq={event.get_user_id()}]哥哥讨厌~不想揍哥哥'))
+    else:
+        await hitme.finish(Message(f'[CQ:at,qq={event.get_user_id()}]哥哥说不可以跟hentai说话（嫌弃）'))
