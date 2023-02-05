@@ -739,4 +739,7 @@ async def _(state: T_State):
 hitme = on_command("梨花揍我",block=True,priority=90)
 @hitme.handle()
 async def _(bot: Bot, event: Event):
-    await hitme.finish(Message(f'[CQ:at,qq={event.get_user_id()}]哥哥说不可以跟hentai说话（嫌弃）'))
+    if event.get_user_id() == "739150373":
+        await hitme.finish(Message(f'[CQ:at,qq={event.get_user_id()}]哥哥讨厌~不想揍哥哥'))
+    else:
+        await hitme.finish(Message(f'[CQ:at,qq={event.get_user_id()}]哥哥说不可以跟hentai说话（嫌弃）'))
