@@ -340,7 +340,7 @@ async def _(bot: Bot, event: MessageEvent,state:T_State):
 
     # 用state字典把这里获取的user_id保存
     state['userid'] = str(event.user_id)
-    await run_car.send("请输入发车信息，例如：\n《桌游名》\n【人数】X=X\n【教学】带教学\n【类型】美式/战斗\n【时长】教15分钟；玩60分钟\n【扩展】不带扩\n【难度】bgg(2.03 / 5)；集石(4/10)\n【房名】XXX\n【密码】XXX\n【语音】https://kook.top/XXX\nPS： 这是一辆车车的模板")
+    await run_car.send("请输入发车信息，例如：\n《桌游名》\n【人数】X=X\n【教学】带教学\n【类型】美式/战斗\n【时长】教15分钟；玩60分钟\n【扩展】不带扩\n【难度】bgg(2.03 / 5)；集石(4/10)\n【房名】XXX\n【密码】XXX\n【语音】https://kook.top/XXX\nPS： 这是一辆车车的模板~")
 
 @run_car.got("content")
 async def _(state:T_State,content: str = ArgPlainText("content"),prompt="模板"):
