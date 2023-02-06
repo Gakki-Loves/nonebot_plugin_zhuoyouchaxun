@@ -13,8 +13,8 @@ require("nonebot_plugin_apscheduler")
 from nonebot_plugin_apscheduler import scheduler
 
 import asyncio
-from nonebot import on_command
-from nonebot import on_notice
+from nonebot import on_command,on_notice,on_request
+
 from nonebot.plugin import on_keyword,on_regex
 from nonebot.adapters.onebot.v11 import Bot, Event,NoticeEvent
 from nonebot.adapters.onebot.v11.message import Message
@@ -22,7 +22,8 @@ import nonebot
 from nonebot.adapters.onebot.v11 import (GROUP, PRIVATE_FRIEND, Bot,
                                          GroupMessageEvent, Message,
                                          MessageEvent,MessageSegment,
-                                         PrivateMessageEvent,GroupIncreaseNoticeEvent)
+                                         PrivateMessageEvent,GroupIncreaseNoticeEvent,
+                                         GroupRequestEvent,RequestEvent)
 from nonebot.adapters.onebot.v11 import GROUP_ADMIN, GROUP_OWNER
 import sqlite3
 from pathlib import Path
@@ -426,7 +427,7 @@ async def _(bot: Bot, event: MessageEvent,state:T_State):
         else:
             message = car_list[1]+car_list[2]
             message_list.append(message)
-            
+
     # 尝试发送
     try:
         if isinstance(event, PrivateMessageEvent):
@@ -726,12 +727,12 @@ async def _(state: T_State):
         await broadcastruncar.reject(f"无效目标对象: {sid}")
     await broadcastruncar.finish(pm.Update_broadcastruncar(sid,state['broadcastruncar']))
 
-
-
-
-
-
-
+# 先自动审批加群信息，懒
+auto_req = on_request(priority =1,  block =True)
+@auto_req.handle()
+async def _(bot:Bot,event : GroupRequestEvent):
+    # 自动同意别人的邀请
+    await event.approve(bot)
 
 
 
@@ -744,3 +745,19 @@ async def _(bot: Bot, event: Event):
         await hitme.finish(Message(f'[CQ:at,qq={event.get_user_id()}]哥哥讨厌~不想揍哥哥'))
     else:
         await hitme.finish(Message(f'[CQ:at,qq={event.get_user_id()}]哥哥说不可以跟hentai说话（嫌弃）'))
+
+tietie = on_command("梨花贴贴",block=True,priority=90)
+@tietie.handle()
+async def _(bot: Bot, event: Event):
+    if event.get_user_id() == "739150373":
+        await tietie.finish(Message(f'[CQ:at,qq={event.get_user_id()}]和哥哥贴贴~'))
+    else:
+        await tietie.finish(Message(f'[CQ:at,qq={event.get_user_id()}]梨花不和不熟悉的人贴贴！'))
+
+kiss = on_command("梨花亲亲",block=True,priority=90)
+@kiss.handle()
+async def _(bot: Bot, event: Event):
+    if event.get_user_id() == "739150373":
+        await kiss.finish(Message(f'[CQ:at,qq={event.get_user_id()}]不可以呦！去亲嫂子去！'))
+    else:
+        await kiss.finish(Message(f'[CQ:at,qq={event.get_user_id()}]给梨花爬！'))
