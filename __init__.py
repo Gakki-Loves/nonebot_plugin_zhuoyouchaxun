@@ -126,7 +126,7 @@ async def _(bot: Bot, event: MessageEvent,state: T_State):
         else:
             message = idname[1]+idname[2]
             message_list.append(message)
-            #如果没查询到，则ifchaxun为假，got直接finish
+            #如果没查询到，则ifchaxun为假直接finish
             state['ifchaxun'] = False
 
     # 为后面撤回消息做准备
@@ -156,8 +156,7 @@ async def _(bot: Bot, event: MessageEvent,state: T_State):
         elif state['ifchaxun'] == False:
             for msg in message_list:
                     #await chaxun.send(msg)
-                    zhuoyou_msg_id.append((await chaxun.send(msg))['message_id'])
-                    await asyncio.sleep(0.5)
+                    zhuoyou_msg_id.append((await chaxun.finish(msg))['message_id'])
     #若发送失败
     except ActionFailed as F:
         logger.warning(F)
@@ -232,11 +231,6 @@ async def _(bot: Bot, event: MessageEvent,state: T_State):
     if cmd_search_boardgame == False:
         await chaxun.finish("图包查询功能没有开启哦~")
 
-
-
-
-
-
     args = list(state["_matched_groups"])
     tubao_name = args[1]  #读取桌游名称
 
@@ -264,23 +258,28 @@ async def _(bot: Bot, event: MessageEvent,state: T_State):
 
     # 尝试发送
     try:
-        if isinstance(event, PrivateMessageEvent):
-            for msg in message_list:
-                #await chaxun.send(msg)
-                tubao_msg_id.append((await tubao.send(msg))['message_id'])
-                await asyncio.sleep(0.5)
-        elif isinstance(event, GroupMessageEvent):
-            msgs = []
-            for msg in message_list:
-                msgs.append({
+        if state['iftubao'] == True:
+            if isinstance(event, PrivateMessageEvent):
+                for msg in message_list:
+                    #await chaxun.send(msg)
+                    tubao_msg_id.append((await tubao.send(msg))['message_id'])
+                    await asyncio.sleep(0.5)
+            elif isinstance(event, GroupMessageEvent):
+                msgs = []
+                for msg in message_list:
+                    msgs.append({
                     'type': 'node',
                     'data': {
                         'name': "梨花酱",
                         'uin': bot.self_id,
                         'content': msg
                     }
-                })
-        await bot.call_api('send_group_forward_msg', group_id=event.group_id, messages=msgs)
+                    })
+                await bot.call_api('send_group_forward_msg', group_id=event.group_id, messages=msgs)
+        elif state['iftubao'] == False:
+            for msg in message_list:
+                    #await chaxun.send(msg)
+                    await tubao.finish(msg)
     #若发送失败
     except ActionFailed as F:
         logger.warning(F)
@@ -427,9 +426,7 @@ async def _(bot: Bot, event: MessageEvent,state:T_State):
         else:
             message = car_list[1]+car_list[2]
             message_list.append(message)
-
-
-
+            
     # 尝试发送
     try:
         if isinstance(event, PrivateMessageEvent):
