@@ -30,7 +30,7 @@ _✨ NoneBot 桌游查询 ✨_
 
 ## 管理员命令
 - 查看群列表
-- broadcast on/off 多群轮播总开关
+- broadcast on/off 多群广播总开关
 - lihua_wl  add/del 白名单增减
 - lihua_ban add/del 黑名单增减
 

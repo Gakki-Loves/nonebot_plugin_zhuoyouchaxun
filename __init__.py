@@ -36,7 +36,8 @@ from .permission_manager import PermissionManager
 
 from  nonebot . params  import  Arg ,  CommandArg ,  ArgPlainText 
 from .get_data import get_idname,get_BGinfo,get_tubaoname,get_tubaoinfo,runcar,searchcar
-
+import time # 快乐小隆要用做时间转换
+import re # 快乐小隆要用做时间转换
 
 #======================================================================================
 #===================================快乐小隆功能区=========================================
@@ -328,7 +329,7 @@ async def _(bot:Bot,event:MessageEvent,state: T_State,tubao_id: str = ArgPlainTe
 
 
 # ----------------------发车------------------------------
-run_car = on_command("桌游发车",block=True,priority=10)
+run_car = on_command("桌游发车",block=True,priority=10,aliases={"发车"})
 
 @run_car.handle()
 async def _(bot: Bot, event: MessageEvent,state:T_State):
@@ -360,13 +361,24 @@ async def _(bot: Bot,state:T_State,event: GroupMessageEvent,deadline: str = ArgP
     #car_id = str(state['userid'])
     state['deadline'] = deadline
     deadline = deadline.replace("：", ":")
-    if "24:00">=deadline>="00:00":
-        car_id = str(state['userid'])
-        content = str(state['content'])
-        runcar(car_id,content,deadline)
+    matchObj = re.match(r"^([0-9]|1[0-9]|2[0-3]|0[0-9]):([0-9]|[1-5]\d|0[0-9])$", deadline, re.I)#正则表达式，来检验AA:BB这样的时间，其中AA的范围是0-23和00-23，BB的范围是00-59和0-59
+    if(matchObj!=None):# 如果上面这个re.match函数匹配到东西了，也就是matchObj的结果不为None那说明用户输入的时间是正确的
+        timeArray = time.strptime(deadline, "%H:%M") # 把用户输入的时间拆分为小时和分钟，以便于后续把9:31这样的“少0”的时间变成正常的XX:XX格式的时间
+        hour=timeArray[3] # 小时
+        min=timeArray[4] # 分钟
+        if(hour>=0 and hour<=9): #
+            deadline='0'+str(hour)+":" # 把0-9点前面加0，这步结束deadline的值应该是变成00，01，02，···，09
+        else:
+            deadline=str(hour)+":"# 如果小时是11-23那就不管，这步结束deadline的值应该是变成10，11，12，···，23
+        if(min>=0 and min<=9): 
+            deadline=deadline+'0'+str(min) # 把0-9分前面加0
+        if "24:00">=deadline>="00:00":# 虽然根据"^[0-23]{1,2}:[0-59]{1,2}$"这个正则表达式，只要能进到if(matchObj!=None):里的时间，都肯定符合"24:00">=deadline>="00:00"这个要求，但为了不删除Gakki的代码，还是把这句话保留下来了
+            car_id = str(state['userid'])
+            content = str(state['content'])
+            runcar(car_id,content,deadline)
     else:
-        await run_car.finish("敲你脑袋哦！时间要正确填写！")
-    # ------多群轮播发车信息功能
+        await run_car.finish("敲你脑袋哦！时间填错啦！请输入“桌游发车”重新操作哦~")
+    # ------多群广播发车信息功能
     cmd_broad_cast = pm.Query_broadcast_runcar()
     #cmd_broadcast = pm.Query_broadcastruncar(state['sid'])
     group_list = await bot.get_group_list()
@@ -374,30 +386,35 @@ async def _(bot: Bot,state:T_State,event: GroupMessageEvent,deadline: str = ArgP
     group_id = str(event.group_id)
     if group_id == "177053575":
         if cmd_broad_cast == True:
-            # 这里要判断各个群是否开启了接收多群轮播功能
+            # 这里要判断各个群是否开启了接收多群广播功能
             # 没开的就不发送开车信息
             # 本来应该写个函数的
             # 但是我懒
             # 所以就直接写在循环里了
             # 罪过罪过
+            allGroupNum=0 # 共有多少群，即梨花加入的所有群数量之和
+            onBroadCastGroupNum=0 # 开启了广播功能的有多少群
             for group in group_list:
+                allGroupNum+=1
                 group_id=group["group_id"]
                 sessionId = 'group_' + str(group_id)
-                # 找到这个群的多群轮播功能开了没
+                # 找到这个群的多群广播功能开了没
                 cmd_broadcast = pm.Query_broadcastruncar(sessionId)
                 if cmd_broadcast:
-                    await bot.send_group_msg(group_id=group["group_id"], message=(content+"\n截止时间："+deadline))
+                    onBroadCastGroupNum+=1
+                    await bot.send_group_msg(group_id=group["group_id"], message=(content+"\n截止时间："+deadline+"\n这条是多群广播信息，第二轮测试期间，发车信息被多群广播只有在梨花的图书馆（群号：177053575）才可以使用哦！"))
+            await run_car.finish(f"梨花一共加入了{allGroupNum}个群，已经帮您广播转发到了{onBroadCastGroupNum}个群，其余群关闭了接收广播功能~")
         elif cmd_broad_cast == False:
-            await run_car.finish("多群轮播功能没有开启呦~梨花已经帮你记录到车库啦！")
+            await run_car.finish("多群广播功能没有开启呦~梨花已经帮你记录到车库啦！")
         else:
-            await run_car.finish("多群轮播设置不正确哦！")
+            await run_car.finish("多群广播设置不正确哦！")
     else:
-        await run_car.finish("梨花已经帮你记录到车库啦！\n(多群轮播只有在梨花的图书馆（群号：177053575）才可以使用哦！)")
+        await run_car.finish("梨花已经帮你记录到车库啦！\n(第二轮测试期间，发车信息被多群广播只有在梨花的图书馆（群号：177053575）才可以使用哦！)")
 
 
 
 # -----------------------查车-----------------------
-search_car = on_command("桌游查车",block=True,priority=11)
+search_car = on_command("桌游查车",block=True,priority=11,aliases={"查车"})
 @search_car.handle()
 async def _(bot: Bot, event: MessageEvent,state:T_State):
 
@@ -478,15 +495,16 @@ async def _():
 
 # -----------------------帮助菜单-----------------------
 # 普通命令
-lihuahelp = on_command("梨花命令",block=True, priority=10)
+lihuahelp = on_command("梨花命令",block=True, priority=10,aliases={"梨花指令","梨花帮助文档","梨花酱 指令","梨花酱指令","梨花帮助","梨花文档","梨花help"})
 @lihuahelp.handle()
 async def _():
     help_msg = """梨花的使用命令:
     桌游功能：          
-    ‘桌游查询 XXX’  查询XXX桌游信息
-    ‘图包查询 XXX’  查询XXX图包信息
-    ‘桌游查车’      查询正在进行的桌游车
-    ‘桌游发车’      你来开一辆车
+    ‘桌游查询 XXX’       查询XXX桌游信息
+    ‘图包查询 XXX’       查询XXX图包信息
+    ‘桌游查车’/‘查车’    查询正在进行的桌游车
+    ‘桌游发车’/‘发车’    你来开一辆车
+    (发送”桌游发车“梨花可以把你的约车信息广播到几十个群哦)
 
     其他功能：
     ‘XX天气’        查询XX未来几天的天气
@@ -498,7 +516,7 @@ async def _():
     await lihuahelp.finish(help_msg)
 
 # 管理员命令
-lihua_cmdhelp = on_command("梨花管理员命令",permission=GROUP_ADMIN|GROUP_OWNER|SUPERUSER,block=True, priority=10)
+lihua_cmdhelp = on_command("梨花管理员命令",permission=GROUP_ADMIN|GROUP_OWNER|SUPERUSER,block=True, priority=10,aliases={"梨花管理员指令","梨花管理员帮助文档","梨花酱 管理员指令","梨花酱管理员指令","梨花管理员帮助","梨花管理员文档","梨花管理员help","梨花help管理员"})
 @lihua_cmdhelp.handle()
 async def _():
     help_msg = """梨花的管理员命令:
@@ -515,7 +533,7 @@ async def _():
     lihua_search_mod on/off        开启/关闭图包查询
     lihua_run_car on/off           开启/关闭桌游发车
     lihua_search_car on/off        开启/关闭桌游查车
-    lihua_broadcastruncar on/off   开启/关闭多群轮播
+    lihua_broadcastruncar on/off   开启/关闭本群的多群广播接收功能
     """
     await lihua_cmdhelp.finish(help_msg)
 
@@ -530,7 +548,7 @@ async  def  GroupNewMember ( bot :  Bot ,  event :  GroupIncreaseNoticeEvent ):
             MessageSegment . text ( '小伙伴们好呀~我是梨花酱，是桌游图书馆的管理员哦~\n' ) ) )
     else:
         await bot.send_group_msg ( group_id =event . group_id ,  message =Message ( 
-            MessageSegment . at ( event . user_id )  + MessageSegment . text ( "欢迎新桌友哦~我是桌游图书馆管理员梨花酱，请注意查看群公告内容~\n" ))) 
+            MessageSegment . at ( event . user_id )  + MessageSegment . text ( "欢迎新桌友哦~我是桌游图书馆管理员梨花酱，请注意查看群公告内容~梨花可以帮你查找图包，向几十个群发送您的约车信息~发送“梨花命令”四个字可以获得梨花的命令目录哦~\n" ))) 
 
 
 
@@ -549,7 +567,7 @@ async def _(bot: Bot, event: MessageEvent):
         message = message+f"\n群名称："+group["group_name"]
     await search_group_list.send(message)
 
-# -----多群轮播发车功能的开启与关闭
+# -----多群广播发车功能的开启与关闭
 broadcast_runcar = on_command("broadcast", permission=SUPERUSER, block=True, priority=10)
 # 分析是开是关
 @broadcast_runcar.handle()
@@ -557,11 +575,11 @@ async def cmdArg(state: T_State,cmd:Message = CommandArg()):
     if 'on' in str(cmd):
         state['broadcast_runcar'] = True
         pm.broadcast_runcar(state['broadcast_runcar'])
-        await broadcast_runcar.finish("多群轮播功能打开啦！")
+        await broadcast_runcar.finish("多群广播功能打开啦！")
     elif 'off' in str(cmd):
         state['broadcast_runcar'] = False
         pm.broadcast_runcar(state['broadcast_runcar'])
-        await broadcast_runcar.finish("多群轮播功能关闭啦！")
+        await broadcast_runcar.finish("多群广播功能关闭啦！")
     else:
         await broadcast_runcar.finish(f'无效参数: {cmd}, 请输入 on 或 off 为参数')
 
@@ -704,7 +722,7 @@ async def _(state: T_State):
         await search_car.reject(f"无效目标对象: {sid}")
     await search_car.finish(pm.Update_search_car(sid,state['search_car']))
 
-# ------- 是否发送多群轮播车主信息开启与关闭 -------
+# ------- 是否发送多群广播车主信息开启与关闭 -------
 broadcastruncar = on_command("lihua_broadcastruncar", permission=GROUP_ADMIN|GROUP_OWNER|SUPERUSER, block=True, priority=10)
 # 分析是新增还是删除
 @broadcastruncar.handle()

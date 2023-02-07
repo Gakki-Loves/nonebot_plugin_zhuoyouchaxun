@@ -60,7 +60,7 @@ def get_idname(name):
             data.append(msg_list)
             return [data]
     except:
-        return [False,error, f"查询失败啦！好好看群公告的命令~梨花不喜欢和不看群公告的人说发！"]
+        return [False,error, f"查询失败啦！是不是命令记得不清楚呀？发送“梨花命令”这四个字查看所有命令哦~"]
 
 # 桌游具体信息查询，参数为桌游ID
 def get_BGinfo(bgid):
@@ -84,7 +84,7 @@ def get_BGinfo(bgid):
     # 如果没有结果
     try:
         if db_data == []:
-            data.append([False,error, f"梨花酱没有搜到桌游ID:{bgid}的信息~要认真校对哦"])
+            data.append([False,error, f"梨花酱没有搜到桌游ID:{bgid}的信息~要认真校对哦~请发送“桌游查询 XXX”重新查询哦"])
             return data
         else:
             data.append(True)
@@ -105,7 +105,7 @@ def get_BGinfo(bgid):
             data.append(msg)
             return [data]
     except:
-        return [False,error, f"你说的梨花听不懂啦！好好看看群公告里的命令再找我！"]
+        return [False,error, f"你说的梨花听不懂啦！是不是命令记得不清楚呀？发送“梨花命令”这四个字查看所有命令哦~"]
 
 #查询图包信息，返回参数为图包id和图包名称
 def get_tubaoname(tubao_name):
@@ -145,7 +145,7 @@ def get_tubaoname(tubao_name):
             data.append(msg_list)
             return [data]
     except:
-        return [False,error, f"查询失败啦！好好看群公告的命令~梨花不喜欢和不看群公告的人说发！"]
+        return [False,error, f"查询失败啦！是不是命令记得不清楚呀？发送“梨花命令”这四个字查看所有命令哦~"]
 
 #根据图包id获取图包链接
 def get_tubaoinfo(tubao_id):
@@ -169,7 +169,7 @@ def get_tubaoinfo(tubao_id):
     # 如果没有结果
     try:
         if db_data == []:
-            data.append([False,error, f"梨花酱没有搜到图包ID:{tubao_id}的信息呢~请发送准确的图包ID呦"])
+            data.append([False,error, f"梨花酱没有搜到图包ID:{tubao_id}的信息呢~请发送“图包查询 XXX”重新查询哦"])
             return data
         else:
             data.append(True)
@@ -183,7 +183,7 @@ def get_tubaoinfo(tubao_id):
             return [data]
 
     except:
-        return [False,error, f"查询失败啦！好好看群公告的命令~梨花不喜欢和不看群公告的人说发！~"]
+        return [False,error, f"查询失败啦！是不是命令记得不清楚呀？发送“梨花命令”这四个字查看所有命令哦~"]
 
 def runcar(user_id,content,deadline):
     # 连接数据库
@@ -246,7 +246,7 @@ def searchcar():
             return [data]
 
     except:
-        return [False,error, f"查询失败啦！好好看群公告的命令~梨花不喜欢和不看群公告的人说发！~"]
+        return [False,error, f"查询失败啦！是不是命令记得不清楚呀？发送“梨花命令”这四个字查看所有命令哦~"]
 
 
     
