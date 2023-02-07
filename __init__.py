@@ -363,7 +363,7 @@ async def _(bot: Bot,state:T_State,event: GroupMessageEvent,deadline: str = ArgP
     deadline = deadline.replace("：", ":")
     matchObj = re.match(r"^([0-9]|1[0-9]|2[0-3]|0[0-9]):([0-9]|[1-5]\d|0[0-9])$", deadline, re.I)#正则表达式，来检验AA:BB这样的时间，其中AA的范围是0-23和00-23，BB的范围是00-59和0-59
     if(matchObj!=None):# 如果上面这个re.match函数匹配到东西了，也就是matchObj的结果不为None那说明用户输入的时间是正确的
-        timeArray = time.strptime(deadline, "%H:%M") # 把用户输入的时间拆分为后续把9:31这样的“少0”的时间变成正常的XX:XX格式的时间
+        timeArray = time.strptime(deadline, "%H:%M") # 把用户输入的时间拆分为小时和分钟，以便于后续把9:31这样的“少0”的时间变成正常的XX:XX格式的时间
         hour=timeArray[3] # 小时
         min=timeArray[4] # 分钟
         if(hour>=0 and hour<=9): #
@@ -402,7 +402,7 @@ async def _(bot: Bot,state:T_State,event: GroupMessageEvent,deadline: str = ArgP
                 cmd_broadcast = pm.Query_broadcastruncar(sessionId)
                 if cmd_broadcast:
                     onBroadCastGroupNum+=1
-                    await bot.send_group_msg(group_id=group["group_id"], message=(content+"\n截止时间："+deadline))
+                    await bot.send_group_msg(group_id=group["group_id"], message=(content+"\n截止时间："+deadline+"\n这条是多群广播信息，第二轮测试期间，发车信息被多群广播只有在梨花的图书馆（群号：177053575）才可以使用哦！"))
             await run_car.finish(f"梨花一共加入了{allGroupNum}个群，已经帮您广播转发到了{onBroadCastGroupNum}个群，其余群关闭了接收广播功能~")
         elif cmd_broad_cast == False:
             await run_car.finish("多群广播功能没有开启呦~梨花已经帮你记录到车库啦！")
