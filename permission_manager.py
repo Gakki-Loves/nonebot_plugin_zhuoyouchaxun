@@ -26,14 +26,14 @@ except:
 
 
 '''{
-    'broadcast_runcar'     :False,      #多群轮播总功能
+    'broadcast_runcar'     :False,      #多群广播总功能
     'group_114541':{
         # 桌游相关功能
         'search_boardgame' : True,     # 桌游查询
         'search_mod'       : True,     # 图包查询
         'run_car'          : True,     # 桌游发车
         'search_car'       : True,     # 桌游查车
-        'broadcastruncar' : True,      # 是否发送多群轮播车主信息
+        'broadcastruncar' : True,      # 是否发送多群广播车主信息
     },
     'last':{
         'user_1919' : 810    # 最近一次发送时间
@@ -105,7 +105,7 @@ class PermissionManager:
     # --------------- 文件读写 ---------------
 
     #---------------- 查询部分 -------------------
-    # 查询 多群轮播总开关
+    # 查询 多群广播总开关
     def Query_broadcast_runcar(self):
         try:
             # 有设置就返回设置的
@@ -150,7 +150,7 @@ class PermissionManager:
             # 没设置就返回默认的全局变量
             return self.search_car
 
-    # 查询 “多群轮播”功能
+    # 查询 “多群广播”功能
     def Query_broadcastruncar(self,sessionId:str):
         try:
             # 有设置就返回设置的
@@ -180,7 +180,7 @@ class PermissionManager:
                 return f'成功移除{sessionId}出白名单'
             return f'{sessionId}不在白名单'
     
-    # 多群轮播功能
+    # 多群广播功能
     def broadcast_runcar(self,broadcast_runcar:bool):
         self.cfg['broadcast_runcar'] = broadcast_runcar
         self.WriteCfg()
@@ -247,7 +247,7 @@ class PermissionManager:
             self.cfg[sessionId]['search_car'] = False
             self.WriteCfg()
             return f'成功关闭{sessionId}的桌游查车权限'
-    # 是否发送多群轮播车主信息
+    # 是否发送多群广播车主信息
     def Update_broadcastruncar(self,sessionId:str,broadcastruncar:bool):
         # 检查是否已在白名单, 不在则结束
         if not sessionId in self.cfg.keys():
@@ -257,11 +257,11 @@ class PermissionManager:
         if broadcastruncar:
             self.cfg[sessionId]['broadcastruncar'] = True
             self.WriteCfg()
-            return f'成功开启{sessionId}的多群轮播权限'
+            return f'成功开启群号为{sessionId}的多群广播接收权限'
         else:
             self.cfg[sessionId]['broadcastruncar'] = False
             self.WriteCfg()
-            return f'成功关闭{sessionId}的多群轮播权限'
+            return f'成功关闭群号为{sessionId}的多群广播权限'
     # 黑名单部分
     # add_mode = True，加入黑名单；add_mode = False，移除黑名单
     def UpdateBanList(self,sessionId:str,add_mode:bool):
