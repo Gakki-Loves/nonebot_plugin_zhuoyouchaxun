@@ -35,7 +35,7 @@ from nonebot.permission import SUPERUSER
 from .permission_manager import PermissionManager
 
 from  nonebot . params  import  Arg ,  CommandArg ,  ArgPlainText 
-from .get_data import get_idname,get_BGinfo,get_tubaoname,get_tubaoinfo,runcar,searchcar
+from .get_data import get_idname,get_BGinfo,get_tubaoname,get_tubaoinfo,runcar,searchcar,uploadmod
 import time # 快乐小隆要用做时间转换
 import re # 快乐小隆要用做时间转换
 
@@ -479,6 +479,63 @@ async def _(bot: Bot, event: MessageEvent,state:T_State):
 
 
 # -----------------------------------------------------
+
+# ----------------------上传图包------------------------------
+upload_mod = on_command("上传图包",priority=10,)
+
+@upload_mod.handle()
+async def _(bot: Bot, event: MessageEvent,state:T_State):
+
+    ## 开启关闭功能写不写，谁会拒绝上传图包呢
+    # 功能开启判定
+    #if isinstance(event, PrivateMessageEvent):
+        #state['sid'] = 'user_' + str(event.user_id)
+    #if isinstance(event, GroupMessageEvent):
+        #state['sid'] = 'group_' + str(event.group_id)
+    #cmd_search_boardgame = pm.Query_run_car(state['sid'])
+    #if cmd_search_boardgame == False:
+        #await chaxun.finish("桌游发车功能没有开启哦~")
+
+    # 用state字典把这里获取的user_id保存
+    state['upload_id'] = str(event.user_id)
+    await upload_mod.send("请输入你上传图包的图包名字\n例如“王权骰铸/瞎几把投/侠技霸骰”\n（PS：可以把你知道的别名都写上去哦~）")
+
+@upload_mod.got("mod_name")
+async def _(state:T_State,mod_name: str = ArgPlainText("mod_name"),prompt="模板"):
+    # 获取刚刚获得的user_id，这样就能跨函数使用
+    #car_id = str(state['userid'])
+    state['mod_name'] = mod_name
+    await upload_mod.send("请输入图包的网盘链接~\n例如“https://share.weiyun.com/CQOzyNx4”")
+
+
+@upload_mod.got("link")
+async def _(bot: Bot,state:T_State,event: GroupMessageEvent,link: str = ArgPlainText("link")):
+    #获取刚刚获得的上传人id和图包名字
+    mod_name = str(state['mod_name'])
+    upload_id = str(state['upload_id'])
+    uploadmod(upload_id,mod_name,link)
+    await upload_mod.send("上传图包完毕~感谢你为桌游图书馆做出的贡献~")
+    # ------
+    # 这里其实可以加一个对link的正则匹配，得是https://开头的（网盘应该不会有http协议）
+    # ------
+
+    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 # -----------------------cheche表每天删除-----------------------
 # 定时任务函数
