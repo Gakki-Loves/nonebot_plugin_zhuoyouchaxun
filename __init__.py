@@ -384,31 +384,7 @@ async def _(bot: Bot,state:T_State,event: GroupMessageEvent,deadline: str = ArgP
     group_list = await bot.get_group_list()
     # 判断是否为主群
     group_id = str(event.group_id)
-    if cmd_broad_cast == True:
-        # 这里要判断各个群是否开启了接收多群广播功能
-        # 没开的就不发送开车信息
-        # 本来应该写个函数的
-        # 但是我懒
-        # 所以就直接写在循环里了
-        # 罪过罪过
-        allGroupNum=0 # 共有多少群，即梨花加入的所有群数量之和
-        onBroadCastGroupNum=0 # 开启了广播功能的有多少群
-        for group in group_list:
-            allGroupNum+=1
-            group_id=group["group_id"]
-            sessionId = 'group_' + str(group_id)
-            # 找到这个群的多群广播功能开了没
-            cmd_broadcast = pm.Query_broadcastruncar(sessionId)
-            if cmd_broadcast:
-                onBroadCastGroupNum+=1
-                await bot.send_group_msg(group_id=group["group_id"], message=(content+"\n截止时间："+deadline))
-        await run_car.finish(f"梨花一共加入了{allGroupNum}个群，已经帮您广播转发到了{onBroadCastGroupNum}个群，其余群关闭了接收广播功能~")
-    elif cmd_broad_cast == False:
-        await run_car.finish("多群广播功能没有开启呦~梨花已经帮你记录到车库啦！")
-    else:
-        await run_car.finish("多群广播设置不正确哦！")
-
-    '''if group_id == "177053575":
+    if group_id == "177053575":
         if cmd_broad_cast == True:
             # 这里要判断各个群是否开启了接收多群广播功能
             # 没开的就不发送开车信息
@@ -416,19 +392,24 @@ async def _(bot: Bot,state:T_State,event: GroupMessageEvent,deadline: str = ArgP
             # 但是我懒
             # 所以就直接写在循环里了
             # 罪过罪过
+            allGroupNum=0 # 共有多少群，即梨花加入的所有群数量之和
+            onBroadCastGroupNum=0 # 开启了广播功能的有多少群
             for group in group_list:
+                allGroupNum+=1
                 group_id=group["group_id"]
                 sessionId = 'group_' + str(group_id)
                 # 找到这个群的多群广播功能开了没
                 cmd_broadcast = pm.Query_broadcastruncar(sessionId)
                 if cmd_broadcast:
+                    onBroadCastGroupNum+=1
                     await bot.send_group_msg(group_id=group["group_id"], message=(content+"\n截止时间："+deadline))
+            await run_car.finish(f"梨花一共加入了{allGroupNum}个群，已经帮您广播转发到了{onBroadCastGroupNum}个群，其余群关闭了接收广播功能~")
         elif cmd_broad_cast == False:
             await run_car.finish("多群广播功能没有开启呦~梨花已经帮你记录到车库啦！")
         else:
             await run_car.finish("多群广播设置不正确哦！")
     else:
-        await run_car.finish("梨花已经帮你记录到车库啦！\n(第二轮测试期间，发车信息被多群广播只有在梨花的图书馆（群号：177053575）才可以使用哦！)")'''
+        await run_car.finish("梨花已经帮你记录到车库啦！\n(第二轮测试期间，发车信息被多群广播只有在梨花的图书馆（群号：177053575）才可以使用哦！)")
 
 
 
