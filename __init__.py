@@ -372,10 +372,14 @@ async def _(bot: Bot,state:T_State,event: GroupMessageEvent,deadline: str = ArgP
             deadline=str(hour)+":"# 如果小时是11-23那就不管，这步结束deadline的值应该是变成10，11，12，···，23
         if(min>=0 and min<=9): 
             deadline=deadline+'0'+str(min) # 把0-9分前面加0
+        else:
+            deadline+=str(min)
         if "24:00">=deadline>="00:00":# 虽然根据"^[0-23]{1,2}:[0-59]{1,2}$"这个正则表达式，只要能进到if(matchObj!=None):里的时间，都肯定符合"24:00">=deadline>="00:00"这个要求，但为了不删除Gakki的代码，还是把这句话保留下来了
             car_id = str(state['userid'])
             content = str(state['content'])
             runcar(car_id,content,deadline)
+        else :
+            await run_car.finish("敲你脑袋哦！时间填错啦！请输入“桌游发车”重新操作哦~")
     else:
         await run_car.finish("敲你脑袋哦！时间填错啦！请输入“桌游发车”重新操作哦~")
     # ------多群广播发车信息功能
