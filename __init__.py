@@ -567,9 +567,41 @@ search_group_list = on_command("查看群列表",permission=SUPERUSER)
 async def _(bot: Bot, event: MessageEvent):
     group_list = await bot.get_group_list()
     message = f"梨花已加入的群~"
-    for group in group_list:
-        message = message+f"\n群名称："+group["group_name"]
-    await search_group_list.send(message)
+    msg_list = []
+    msgs = []
+    try:
+        if isinstance(event, PrivateMessageEvent):
+            for group in group_list:
+                message = message+f"\n群名称："+group["group_name"]
+            await search_group_list.send(message)
+        elif isinstance(event, GroupMessageEvent):
+            msg_list.append(message)
+            for group in group_list:
+                message = f"群名称："+group["group_name"]
+                msg_list.append(message)
+            for msg in msg_list:
+                msgs.append({
+                    'type': 'node',
+                    'data': {
+                    'name': "梨花酱",
+                    'uin': bot.self_id,
+                    'content': msg
+                    }
+                })
+            await bot.call_api('send_group_forward_msg', group_id=event.group_id, messages=msgs)
+        #若发送失败
+    except ActionFailed as F:
+        logger.warning(F)
+        await search_car.finish(
+            message=Message(f"不听不听，哄我两句再试试！"),
+            at_sender=True
+        )
+
+
+
+    #for group in group_list:
+       # message = message+f"\n群名称："+group["group_name"]
+    #await search_group_list.send(message)
 
 # -----多群广播发车功能的开启与关闭
 broadcast_runcar = on_command("broadcast", permission=SUPERUSER, block=True, priority=10)
