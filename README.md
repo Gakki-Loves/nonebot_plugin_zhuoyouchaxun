@@ -2,7 +2,7 @@
  * @Author: Gakkilove 739150373@qq.com
  * @Date: 2023-02-07 20:03:28
  * @LastEditors: Gakkilove 739150373@qq.com
- * @LastEditTime: 2023-02-09 20:57:14
+ * @LastEditTime: 2023-02-09 20:59:07
  * @FilePath: \nonebot_plugin_zhuoyouchaxun\README.md
  * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
 -->
@@ -57,4 +57,7 @@ _✨ NoneBot 桌游查询 ✨_
 - [ ] 一些群内小游戏
 - [ ] 金币功能，可以进行一些养成操作
 - [ ] 和梨花的好感度功能
+- [ ] 封车功能
+- [ ] 总的车库，用于数据统计
+- [ ] 给梨花约设/约稿/约文
 - [ ] 写个好看的readme文档（bushi）
