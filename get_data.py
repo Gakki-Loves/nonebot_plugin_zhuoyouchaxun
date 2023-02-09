@@ -264,6 +264,22 @@ def searchcar():
     except:
         return [False,error, f"查询失败啦！是不是命令记得不清楚呀？发送“梨花命令”这四个字查看所有命令哦~"]
 
+# ---总车库记录信息
+def add_garage(player_id,content,group_id,real_time):
+    # 连接数据库
+    conn = sqlite3.connect(
+       Path(os.path.join(os.path.dirname(__file__), "resource"))/"zhuoyou.db")
+    # 创建游标
+    #conn = sqlite3.connect(r'D:\Github\LihuaBot\nb2\LihuaBot\src\plugins\nonebot_plugin_zhuoyouchaxun\resource\zhuoyou.db')
+    cur = conn.cursor()
+    cur.execute(
+        f"INSERT INTO garage(player_id,content,group_id,real_time) VALUES('{player_id}','{content}','{group_id}','{real_time}')"
+    ) 
+    #提交事务
+    conn.commit()
+    conn.close()
+     ### -发完车的广播功能未写
+
 
     
     

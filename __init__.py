@@ -13,7 +13,7 @@ require("nonebot_plugin_apscheduler")
 from nonebot_plugin_apscheduler import scheduler
 
 import asyncio
-from nonebot import on_command,on_notice,on_request
+from nonebot import on_command,on_notice,on_request,on_fullmatch
 
 from nonebot.plugin import on_keyword,on_regex
 from nonebot.adapters.onebot.v11 import Bot, Event,NoticeEvent
@@ -28,6 +28,7 @@ from nonebot.adapters.onebot.v11 import GROUP_ADMIN, GROUP_OWNER
 import sqlite3
 from pathlib import Path
 import os
+import json
 from nonebot.typing import T_State
 from nonebot.log import logger
 from nonebot.exception import ActionFailed
@@ -35,7 +36,11 @@ from nonebot.permission import SUPERUSER
 from .permission_manager import PermissionManager
 
 from  nonebot . params  import  Arg ,  CommandArg ,  ArgPlainText 
-from .get_data import get_idname,get_BGinfo,get_tubaoname,get_tubaoinfo,runcar,searchcar,uploadmod
+from .get_data import get_idname,get_BGinfo,get_tubaoname,get_tubaoinfo,runcar,searchcar,uploadmod,add_garage
+from .player_info import player_init,player_exist,player_rename
+
+
+
 import time # 快乐小隆要用做时间转换
 import re # 快乐小隆要用做时间转换
 
@@ -329,7 +334,7 @@ async def _(bot:Bot,event:MessageEvent,state: T_State,tubao_id: str = ArgPlainTe
 
 
 # ----------------------发车------------------------------
-run_car = on_command("桌游发车",block=True,priority=10,aliases={"发车"})
+run_car = on_command("桌游发车",priority=10,aliases={"发车"})
 
 @run_car.handle()
 async def _(bot: Bot, event: MessageEvent,state:T_State):
@@ -386,6 +391,17 @@ async def _(bot: Bot,state:T_State,event: GroupMessageEvent,deadline: str = ArgP
     cmd_broad_cast = pm.Query_broadcast_runcar()
     #cmd_broadcast = pm.Query_broadcastruncar(state['sid'])
     group_list = await bot.get_group_list()
+
+    # ---写进garage库部分
+    now= str(time.strftime('%Y-%m-%d %a %H:%M:%S'))
+    # 获取字典内容，不要问我为什么不用上面的变量因为我懒
+    player_id = str(state['userid'])
+    content = str(state['content'])
+    group_id = str(event.group_id)
+    add_garage(player_id,content,group_id,now)
+    # ---写进garage库部分
+
+
     # 判断是否为主群
     group_id = str(event.group_id)
     if group_id == "177053575":
@@ -415,8 +431,17 @@ async def _(bot: Bot,state:T_State,event: GroupMessageEvent,deadline: str = ArgP
     else:
         await run_car.finish("梨花已经帮你记录到车库啦！\n(第二轮测试期间，发车信息被多群广播只有在梨花的图书馆（群号：177053575）才可以使用哦！)")
 
-
-
+# -写进garage库部分,前面finish了把内容前移吧，就不再用一个matcher了
+"""@run_car.handle()
+async def _(bot: Bot, event: GroupMessageEvent,state:T_State):
+    # 获取现在的时间
+    now= str(time.strftime('%Y-%m-%d %a %H:%M:%S'))
+    # 获取字典内容
+    player_id = str(state['userid'])
+    content = str(state['content'])
+    group_id = str(event.group_id)
+    add_garage(player_id,content,group_id,now)
+    await run_car.finish()"""
 # -----------------------查车-----------------------
 search_car = on_command("桌游查车",block=True,priority=11,aliases={"查车"})
 @search_car.handle()
@@ -565,7 +590,13 @@ async def _():
     ‘图包查询 XXX’       查询XXX图包信息
     ‘桌游查车’/‘查车’    查询正在进行的桌游车
     ‘桌游发车’/‘发车’    你来开一辆车
+    ‘上传图包’           把你的图包链接上传至数据库
     (发送”桌游发车“梨花可以把你的约车信息广播到几十个群哦)
+
+    个人信息功能
+    （仍在开发，涉及到后续的金币系统和梨花好感度系统）
+    “玩家初始化”        初始化你的个人信息
+    “修改昵称”          修改梨花对你的称谓
 
     其他功能：
     ‘XX天气’        查询XX未来几天的天气
@@ -848,7 +879,7 @@ async def _(bot:Bot,event : GroupRequestEvent):
 
 
 
-# ----------------娱乐功能
+# +------------------------娱乐区-------------------------+
 hitme = on_command("梨花揍我",block=True,priority=90)
 @hitme.handle()
 async def _(bot: Bot, event: Event):
@@ -872,3 +903,39 @@ async def _(bot: Bot, event: Event):
         await kiss.finish(Message(f'[CQ:at,qq={event.get_user_id()}]不可以呦！去亲嫂子去！'))
     else:
         await kiss.finish(Message(f'[CQ:at,qq={event.get_user_id()}]给梨花爬！'))
+
+
+
+
+
+# +------------------------玩家信息区-------------------------+
+# -----玩家初始化
+playerinit = on_fullmatch("玩家初始化",priority=10)
+@playerinit.handle()
+async def _(bot: Bot, event: Event):
+    playerid = event.get_user_id()
+    playername = json.loads(json.dumps(await bot.get_stranger_info(user_id =int(playerid))))['nickname']
+    # 这里要写一个正则匹配，如果名字全是空白字符，自动给他一个昵称“喂”
+    ns =player_exist(playerid)
+    if ns:
+        await playerinit.finish("您已经创建过玩家信息啦")
+    else:
+        player_init(playerid,playername)
+        await playerinit.finish("已经帮您创建好玩家信息了哦~")
+
+
+# -----玩家修改昵称
+playerrename = on_fullmatch("修改昵称",priority=10)
+@playerrename.handle()
+async def _(bot: Bot, event: MessageEvent,state: T_State):
+    playerid = event.get_user_id()
+    state['playerid'] = playerid
+    await playerrename.send("请输入修改后的昵称")
+
+@playerrename.got("rename")
+async def _(state:T_State,rename: str = ArgPlainText("rename"),prompt="rename"):
+    # 获取刚刚获得的playerid，这样就能跨函数使用
+    #car_id = str(state['userid'])
+    playerid =state['playerid']
+    player_rename(playerid,rename)
+    await run_car.finish(f"您的新昵称{rename}已修改完毕~")

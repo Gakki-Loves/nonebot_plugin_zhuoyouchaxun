@@ -2,7 +2,7 @@
  * @Author: Gakkilove 739150373@qq.com
  * @Date: 2023-02-07 20:03:28
  * @LastEditors: Gakkilove 739150373@qq.com
- * @LastEditTime: 2023-02-09 20:59:07
+ * @LastEditTime: 2023-02-10 01:04:01
  * @FilePath: \nonebot_plugin_zhuoyouchaxun\README.md
  * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
 -->
@@ -52,6 +52,8 @@ _✨ NoneBot 桌游查询 ✨_
 
 ## ToDo
 - [x] 增加上传图包功能
+- [x] 桌游总车库记录
+- [x] 初始化个人信息和修改昵称
 - [ ] 更多的权限控制
 - [ ] 群管功能
 - [ ] 一些群内小游戏
