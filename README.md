@@ -1,3 +1,11 @@
+<!--
+ * @Author: Gakkilove 739150373@qq.com
+ * @Date: 2023-02-07 20:03:28
+ * @LastEditors: Gakkilove 739150373@qq.com
+ * @LastEditTime: 2023-02-10 01:04:01
+ * @FilePath: \nonebot_plugin_zhuoyouchaxun\README.md
+ * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
+-->
 
 <p align="center">
   <a href="https://v2.nonebot.dev/"><img src="https://v2.nonebot.dev/logo.png" width="200" height="200" alt="nonebot"></a>
@@ -43,10 +51,15 @@ _✨ NoneBot 桌游查询 ✨_
 
 
 ## ToDo
-- 增加上传图包功能
-- 更多的权限控制
-- 群管功能
-- 一些群内小游戏
-- 金币功能，可以进行一些养成操作
-- 和梨花的好感度功能
-- 写个好看的readme文档（bushi）
+- [x] 增加上传图包功能
+- [x] 桌游总车库记录
+- [x] 初始化个人信息和修改昵称
+- [ ] 更多的权限控制
+- [ ] 群管功能
+- [ ] 一些群内小游戏
+- [ ] 金币功能，可以进行一些养成操作
+- [ ] 和梨花的好感度功能
+- [ ] 封车功能
+- [ ] 总的车库，用于数据统计
+- [ ] 给梨花约设/约稿/约文
+- [ ] 写个好看的readme文档（bushi）

@@ -136,7 +136,7 @@ def get_tubaoname(tubao_name):
             data.append(True)
             for i in range(len(db_data)):
                 msg = (
-                    db_data[i][0]
+                    str(db_data[i][0])
                     + ":"
                     + db_data[i][2]
                     + "\n"
@@ -174,7 +174,7 @@ def get_tubaoinfo(tubao_id):
         else:
             data.append(True)
             msg = (
-                "图包ID:"+ db_data[0][0]
+                "图包ID:"+ str(db_data[0][0])
                 #+ "\n图包名称:"+ db_data[0][1]
                 + "\n文件名称:"+ db_data[0][2]
                 + "\n链接:"+ db_data[0][3]
@@ -195,6 +195,22 @@ def runcar(user_id,content,deadline):
     f"INSERT INTO cheche VALUES({user_id},{content})"
     cur.execute(
         f"INSERT INTO cheche VALUES('{user_id}','{content}','{deadline}')"
+    ) 
+    #提交事务
+    conn.commit()
+    conn.close()
+     ### -发完车的广播功能未写
+
+
+def uploadmod(upload_id,mod_name,link):
+    # 连接数据库
+    conn = sqlite3.connect(
+       Path(os.path.join(os.path.dirname(__file__), "resource"))/"zhuoyou.db")
+    # 创建游标
+    #conn = sqlite3.connect(r'D:\Github\LihuaBot\nb2\LihuaBot\src\plugins\nonebot_plugin_zhuoyouchaxun\resource\zhuoyou.db')
+    cur = conn.cursor()
+    cur.execute(
+        f"INSERT INTO tubao(tubao_name,file_name,link,upload_id) VALUES('{mod_name}','{mod_name}','{link}','{upload_id}')"
     ) 
     #提交事务
     conn.commit()
@@ -247,6 +263,22 @@ def searchcar():
 
     except:
         return [False,error, f"查询失败啦！是不是命令记得不清楚呀？发送“梨花命令”这四个字查看所有命令哦~"]
+
+# ---总车库记录信息
+def add_garage(player_id,content,group_id,real_time):
+    # 连接数据库
+    conn = sqlite3.connect(
+       Path(os.path.join(os.path.dirname(__file__), "resource"))/"zhuoyou.db")
+    # 创建游标
+    #conn = sqlite3.connect(r'D:\Github\LihuaBot\nb2\LihuaBot\src\plugins\nonebot_plugin_zhuoyouchaxun\resource\zhuoyou.db')
+    cur = conn.cursor()
+    cur.execute(
+        f"INSERT INTO garage(player_id,content,group_id,real_time) VALUES('{player_id}','{content}','{group_id}','{real_time}')"
+    ) 
+    #提交事务
+    conn.commit()
+    conn.close()
+     ### -发完车的广播功能未写
 
 
     
