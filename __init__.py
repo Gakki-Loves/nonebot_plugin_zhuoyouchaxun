@@ -36,7 +36,7 @@ from nonebot.permission import SUPERUSER
 from .permission_manager import PermissionManager
 
 from  nonebot . params  import  Arg ,  CommandArg ,  ArgPlainText 
-from .get_data import get_idname,get_BGinfo,get_tubaoname,get_tubaoinfo,runcar,searchcar,uploadmod,add_garage,deletemod
+from .get_data import get_idname,get_BGinfo,get_tubaoname,get_tubaoinfo,runcar,searchcar,uploadmod,add_garage
 from .player_info import player_init,player_exist,player_rename
 
 
@@ -45,7 +45,7 @@ import time # 快乐小隆要用做时间转换
 import re # 快乐小隆要用做时间转换
 
 #======================================================================================
-#===================================快乐小隆功能区 =========================================
+#===================================快乐小隆功能区=========================================
 #======================================================================================
 
 
@@ -334,7 +334,7 @@ async def _(bot:Bot,event:MessageEvent,state: T_State,tubao_id: str = ArgPlainTe
 
 
 # ----------------------发车------------------------------
-run_car = on_fullmatch({"桌游发车","发车"},priority=10)
+run_car = on_command("桌游发车",priority=10,aliases={"发车"})
 
 @run_car.handle()
 async def _(bot: Bot, event: MessageEvent,state:T_State):
@@ -443,7 +443,7 @@ async def _(bot: Bot, event: GroupMessageEvent,state:T_State):
     add_garage(player_id,content,group_id,now)
     await run_car.finish()"""
 # -----------------------查车-----------------------
-search_car = on_fullmatch({"桌游查车","查车"},block=True,priority=11)
+search_car = on_command("桌游查车",block=True,priority=11,aliases={"查车"})
 @search_car.handle()
 async def _(bot: Bot, event: MessageEvent,state:T_State):
 
@@ -506,7 +506,7 @@ async def _(bot: Bot, event: MessageEvent,state:T_State):
 # -----------------------------------------------------
 
 # ----------------------上传图包------------------------------
-upload_mod = on_fullmatch({"上传图包"},priority=10)
+upload_mod = on_command("上传图包",priority=10,)
 
 @upload_mod.handle()
 async def _(bot: Bot, event: MessageEvent,state:T_State):
@@ -538,36 +538,14 @@ async def _(bot: Bot,state:T_State,event: GroupMessageEvent,link: str = ArgPlain
     #获取刚刚获得的上传人id和图包名字
     mod_name = str(state['mod_name'])
     upload_id = str(state['upload_id'])
-    matchObj = re.match(r"^https://.*|http://.*$", link, re.I)#对link（链接）正则匹配以“https://”或“http://”开头的链接
-    if(matchObj!=None):# 如果上面这个re.match函数匹配到东西了，也就是matchObj的结果不为None那说明用户输入的链接是正确的
-        uploadmod(upload_id,mod_name,link)
-        await upload_mod.send("上传图包完毕~感谢您为桌游图书馆做出的贡献~")
-    else:
-        await run_car.finish("链接格式是不是填错啦~请输入“上传图包”重新操作哦~")
-    
+    uploadmod(upload_id,mod_name,link)
+    await upload_mod.send("上传图包完毕~感谢你为桌游图书馆做出的贡献~")
     # ------
     # 这里其实可以加一个对link的正则匹配，得是https://开头的（网盘应该不会有http协议）
-    # ------await run_car.finish("敲你脑袋哦！时间填错啦！请输入“桌游发车”重新操作哦~")
+    # ------
 
-
-    #========================删除图包==================================
-delete_mod = on_fullmatch({"图包删除"},permission=SUPERUSER)
-
-@delete_mod.handle()
-async def _(bot: Bot, event: MessageEvent,state:T_State):
-    await delete_mod.send("请输入要删除的图包id")
     
-@delete_mod.got("id")
-async def _(bot: Bot,state:T_State,event: GroupMessageEvent,mod_id: str = ArgPlainText("id")):
-    msg=deletemod(mod_id)
-    await upload_mod.send(f"图包ID为{mod_id}的图包已删除成功")
-    #之后知道update的返回值是什么了之后再来做异常判定
-    '''if(msg==0):
-        await upload_mod.send(f"梨花酱没有搜到图包ID:{mod_id}的信息呢~请发送“图包删除”重新操作哦")
-    elif (msg==1):
-        await upload_mod.send(f"图包ID为{mod_id}的图包已删除成功")
-    else:
-        await upload_mod.send("查询失败啦！是不是命令记得不清楚呀？发送“梨花命令”这四个字查看所有命令哦~")'''
+
 
 
 
@@ -603,7 +581,7 @@ async def _():
 
 # -----------------------帮助菜单-----------------------
 # 普通命令
-lihuahelp = on_fullmatch({"梨花命令","梨花指令","梨花帮助文档","梨花酱 指令","梨花酱指令","梨花帮助","梨花文档","梨花help"},block=True, priority=10)
+lihuahelp = on_command("梨花命令",block=True, priority=10,aliases={"梨花指令","梨花帮助文档","梨花酱 指令","梨花酱指令","梨花帮助","梨花文档","梨花help"})
 @lihuahelp.handle()
 async def _():
     help_msg = """梨花的使用命令:
@@ -630,7 +608,7 @@ async def _():
     await lihuahelp.finish(help_msg)
 
 # 管理员命令
-lihua_cmdhelp = on_fullmatch({"梨花管理员命令","梨花管理员指令","梨花管理员帮助"},permission=GROUP_ADMIN|GROUP_OWNER|SUPERUSER,block=True, priority=10)
+lihua_cmdhelp = on_command("梨花管理员命令",permission=GROUP_ADMIN|GROUP_OWNER|SUPERUSER,block=True, priority=10,aliases={"梨花管理员指令","梨花管理员帮助文档","梨花酱 管理员指令","梨花酱管理员指令","梨花管理员帮助","梨花管理员文档","梨花管理员help","梨花help管理员"})
 @lihua_cmdhelp.handle()
 async def _():
     help_msg = """梨花的管理员命令:
@@ -672,7 +650,7 @@ async  def  GroupNewMember ( bot :  Bot ,  event :  GroupIncreaseNoticeEvent ):
 
 #------------------------超级用户权限-------------------------
 # -----查看群列表（超级用户专用）
-search_group_list = on_fullmatch({"查看群列表"},permission=SUPERUSER)
+search_group_list = on_command("查看群列表",permission=SUPERUSER)
 @search_group_list.handle()
 async def _(bot: Bot, event: MessageEvent):
     group_list = await bot.get_group_list()
@@ -714,7 +692,7 @@ async def _(bot: Bot, event: MessageEvent):
     #await search_group_list.send(message)
 
 # -----多群广播发车功能的开启与关闭
-broadcast_runcar = on_fullmatch({"broadcast"}, permission=SUPERUSER, block=True, priority=10)
+broadcast_runcar = on_command("broadcast", permission=SUPERUSER, block=True, priority=10)
 # 分析是开是关
 @broadcast_runcar.handle()
 async def cmdArg(state: T_State,cmd:Message = CommandArg()):
@@ -730,7 +708,7 @@ async def cmdArg(state: T_State,cmd:Message = CommandArg()):
         await broadcast_runcar.finish(f'无效参数: {cmd}, 请输入 on 或 off 为参数')
 
 # ----- 白名单添加与解除 -----
-lihua_whitelist = on_fullmatch({"lihua_wl"}, permission=GROUP_ADMIN|GROUP_OWNER|SUPERUSER, block=True, priority=10)
+lihua_whitelist = on_command("lihua_wl", permission=GROUP_ADMIN|GROUP_OWNER|SUPERUSER, block=True, priority=10)
 # 分析是新增还是删除
 @lihua_whitelist.handle()
 async def cmdArg(state: T_State,cmd:Message = CommandArg()):
@@ -753,7 +731,7 @@ async def _(state: T_State):
     await lihua_whitelist.finish(pm.UpdateWhiteList(sid,state['add_mode']))
 
 # ----- 黑名单添加与解除 -----
-lihua_ban = on_fullmatch({"lihua_ban"}, permission=GROUP_ADMIN|GROUP_OWNER|SUPERUSER, block=True, priority=10)
+lihua_ban = on_command("lihua_ban", permission=GROUP_ADMIN|GROUP_OWNER|SUPERUSER, block=True, priority=10)
 # 分析是新增还是删除
 @lihua_ban.handle()
 async def cmdArg(state: T_State,cmd:Message = CommandArg()):
@@ -777,7 +755,7 @@ async def _(state: T_State):
 
 
 # ------- 桌游查询功能开启与关闭 -------
-search_boardgame = on_fullmatch({"lihua_search_boardgame"}, permission=GROUP_ADMIN|GROUP_OWNER|SUPERUSER, block=True, priority=10)
+search_boardgame = on_command("lihua_search_boardgame", permission=GROUP_ADMIN|GROUP_OWNER|SUPERUSER, block=True, priority=10)
 # 分析是新增还是删除
 @search_boardgame.handle()
 async def cmdArg(state: T_State,cmd:Message = CommandArg()):
@@ -800,7 +778,7 @@ async def _(state: T_State):
     await search_boardgame.finish(pm.Update_search_boardgame(sid,state['search_boardgame']))
 
 # ------- 图包查询功能开启与关闭 -------
-search_mod = on_fullmatch({"lihua_search_mod"}, permission=GROUP_ADMIN|GROUP_OWNER|SUPERUSER, block=True, priority=10)
+search_mod = on_command("lihua_search_mod", permission=GROUP_ADMIN|GROUP_OWNER|SUPERUSER, block=True, priority=10)
 # 分析是新增还是删除
 @search_mod.handle()
 async def cmdArg(state: T_State,cmd:Message = CommandArg()):
@@ -823,7 +801,7 @@ async def _(state: T_State):
     await search_mod.finish(pm.Update_search_mod(sid,state['search_mod']))
 
 # ------- 桌游发车功能开启与关闭 -------
-run_car = on_fullmatch({"lihua_run_car"}, permission=GROUP_ADMIN|GROUP_OWNER|SUPERUSER, block=True, priority=10)
+run_car = on_command("lihua_run_car", permission=GROUP_ADMIN|GROUP_OWNER|SUPERUSER, block=True, priority=10)
 # 分析是新增还是删除
 @run_car.handle()
 async def cmdArg(state: T_State,cmd:Message = CommandArg()):
@@ -846,7 +824,7 @@ async def _(state: T_State):
     await run_car.finish(pm.Update_run_car(sid,state['run_car']))
 
 # ------- 桌游查车功能开启与关闭 -------
-search_car = on_fullmatch({"lihua_search_car"}, permission=GROUP_ADMIN|GROUP_OWNER|SUPERUSER, block=True, priority=10)
+search_car = on_command("lihua_search_car", permission=GROUP_ADMIN|GROUP_OWNER|SUPERUSER, block=True, priority=10)
 # 分析是新增还是删除
 @search_car.handle()
 async def cmdArg(state: T_State,cmd:Message = CommandArg()):
@@ -869,7 +847,7 @@ async def _(state: T_State):
     await search_car.finish(pm.Update_search_car(sid,state['search_car']))
 
 # ------- 是否发送多群广播车主信息开启与关闭 -------
-broadcastruncar = on_fullmatch({"lihua_broadcastruncar"}, permission=GROUP_ADMIN|GROUP_OWNER|SUPERUSER, block=True, priority=10)
+broadcastruncar = on_command("lihua_broadcastruncar", permission=GROUP_ADMIN|GROUP_OWNER|SUPERUSER, block=True, priority=10)
 # 分析是新增还是删除
 @broadcastruncar.handle()
 async def cmdArg(state: T_State,cmd:Message = CommandArg()):
@@ -902,7 +880,7 @@ async def _(bot:Bot,event : GroupRequestEvent):
 
 
 # +------------------------娱乐区-------------------------+
-hitme = on_fullmatch({"梨花揍我"},block=True,priority=90)
+hitme = on_command("梨花揍我",block=True,priority=90)
 @hitme.handle()
 async def _(bot: Bot, event: Event):
     if event.get_user_id() == "739150373":
@@ -910,7 +888,7 @@ async def _(bot: Bot, event: Event):
     else:
         await hitme.finish(Message(f'[CQ:at,qq={event.get_user_id()}]哥哥说不可以跟hentai说话（嫌弃）'))
 
-tietie = on_fullmatch({"梨花贴贴"},block=True,priority=90)
+tietie = on_command("梨花贴贴",block=True,priority=90)
 @tietie.handle()
 async def _(bot: Bot, event: Event):
     if event.get_user_id() == "739150373":
@@ -918,7 +896,7 @@ async def _(bot: Bot, event: Event):
     else:
         await tietie.finish(Message(f'[CQ:at,qq={event.get_user_id()}]梨花不和不熟悉的人贴贴！'))
 
-kiss = on_fullmatch({"梨花亲亲"},block=True,priority=90)
+kiss = on_command("梨花亲亲",block=True,priority=90)
 @kiss.handle()
 async def _(bot: Bot, event: Event):
     if event.get_user_id() == "739150373":
