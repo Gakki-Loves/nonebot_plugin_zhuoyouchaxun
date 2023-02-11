@@ -36,7 +36,7 @@ from nonebot.permission import SUPERUSER
 from .permission_manager import PermissionManager
 
 from  nonebot . params  import  Arg ,  CommandArg ,  ArgPlainText 
-from .get_data import get_idname,get_BGinfo,get_tubaoname,get_tubaoinfo,runcar,searchcar,uploadmod,add_garage
+from .get_data import get_idname,get_BGinfo,get_tubaoname,get_tubaoinfo,runcar,searchcar,uploadmod,add_garage,deletemod
 from .player_info import player_init,player_exist,player_rename
 
 
@@ -549,8 +549,25 @@ async def _(bot: Bot,state:T_State,event: GroupMessageEvent,link: str = ArgPlain
     # 这里其实可以加一个对link的正则匹配，得是https://开头的（网盘应该不会有http协议）
     # ------await run_car.finish("敲你脑袋哦！时间填错啦！请输入“桌游发车”重新操作哦~")
 
-    
 
+    #========================删除图包==================================
+delete_mod = on_fullmatch({"图包删除"},permission=SUPERUSER)
+
+@delete_mod.handle()
+async def _(bot: Bot, event: MessageEvent,state:T_State):
+    await delete_mod.send("请输入要删除的图包id")
+    
+@delete_mod.got("id")
+async def _(bot: Bot,state:T_State,event: GroupMessageEvent,mod_id: str = ArgPlainText("id")):
+    msg=deletemod(mod_id)
+    await upload_mod.send(f"图包ID为{mod_id}的图包已删除成功")
+    #之后知道update的返回值是什么了之后再来做异常判定
+    '''if(msg==0):
+        await upload_mod.send(f"梨花酱没有搜到图包ID:{mod_id}的信息呢~请发送“图包删除”重新操作哦")
+    elif (msg==1):
+        await upload_mod.send(f"图包ID为{mod_id}的图包已删除成功")
+    else:
+        await upload_mod.send("查询失败啦！是不是命令记得不清楚呀？发送“梨花命令”这四个字查看所有命令哦~")'''
 
 
 
