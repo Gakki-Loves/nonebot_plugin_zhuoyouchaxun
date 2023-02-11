@@ -25,6 +25,7 @@ from nonebot.adapters.onebot.v11 import (GROUP, PRIVATE_FRIEND, Bot,
                                          PrivateMessageEvent,GroupIncreaseNoticeEvent,
                                          GroupRequestEvent,RequestEvent)
 from nonebot.adapters.onebot.v11 import GROUP_ADMIN, GROUP_OWNER
+from nonebot_plugin_txt2img import Txt2Img
 import sqlite3
 from pathlib import Path
 import os
@@ -36,7 +37,7 @@ from nonebot.permission import SUPERUSER
 from .permission_manager import PermissionManager
 
 from  nonebot . params  import  Arg ,  CommandArg ,  ArgPlainText 
-from .get_data import get_idname,get_BGinfo,get_tubaoname,get_tubaoinfo,runcar,searchcar,uploadmod,add_garage
+from .get_data import get_idname,get_BGinfo,get_tubaoname,get_tubaoinfo,runcar,searchcar,uploadmod,add_garage,delete_car
 from .player_info import player_init,player_exist,player_rename
 
 
@@ -90,6 +91,17 @@ def verifySid(sid:str):
     except:
         return False
 
+# 渲染成图片发送
+def msg_word2pic(wordtitle,wordmsg):
+    title = wordtitle
+    text = wordmsg
+    font_size = 20
+    txt2img = Txt2Img()
+    txt2img.set_font_size(font_size)
+    pic = txt2img.draw(title, text)
+    picmsg = MessageSegment.image(pic)
+    return picmsg
+
 
 # --------------发送查询信息部分-----------------
 # 桌游查询的正则表达式
@@ -136,20 +148,22 @@ async def _(bot: Bot, event: MessageEvent,state: T_State):
             #如果没查询到，则ifchaxun为假直接finish
             state['ifchaxun'] = False
 
-    # 为后面撤回消息做准备
-    zhuoyou_msg_id = []
-
-
     # 尝试发送
     try:
         if state['ifchaxun'] == True:
             if isinstance(event, PrivateMessageEvent):
+                #msglist = message_list[0][0]
+                #test_str = "".join(msglist)
+                #test_str = "".join(test_str)
+                #picmsg = msg_word2pic("",test_str)
+                #await chaxun.send(picmsg)
                 for msg in message_list:
-                    #await chaxun.send(msg)
-                    zhuoyou_msg_id.append((await chaxun.send(msg))['message_id'])
-                    await asyncio.sleep(0.5)
+                    await chaxun.send(msg)
+                    #await asyncio.sleep(0.5)
             elif isinstance(event, GroupMessageEvent):
-                msgs = []
+                for msg in message_list:
+                    await chaxun.send(msg)
+                """msgs = []
                 for msg in message_list:
                     msgs.append({
                     'type': 'node',
@@ -159,11 +173,11 @@ async def _(bot: Bot, event: MessageEvent,state: T_State):
                         'content': msg
                     }
                     })
-                zhuoyou_msg_id.append((await bot.call_api('send_group_forward_msg', group_id=event.group_id, messages=msgs))['message_id'])
+                await bot.call_api('send_group_forward_msg', group_id=event.group_id, messages=msgs)"""
         elif state['ifchaxun'] == False:
             for msg in message_list:
                     #await chaxun.send(msg)
-                    zhuoyou_msg_id.append((await chaxun.finish(msg))['message_id'])
+                    await chaxun.finish(msg)
     #若发送失败
     except ActionFailed as F:
         logger.warning(F)
@@ -483,6 +497,14 @@ async def _(bot: Bot, event: MessageEvent,state:T_State):
                 await search_car.send(msg)
                 await asyncio.sleep(0.5)
         elif isinstance(event, GroupMessageEvent):
+            #title = ' '
+            #text = message_list
+            #font_size = 20
+            #txt2img = Txt2Img()
+            #txt2img.set_font_size(font_size)
+            #pic = txt2img.draw(title, text)
+            #msg = MessageSegment.image(pic)
+
             msgs = []
             for msg in message_list:
                 msgs.append({
@@ -505,8 +527,32 @@ async def _(bot: Bot, event: MessageEvent,state:T_State):
 
 # -----------------------------------------------------
 
+# ----------------------封车------------------------------
+deletecar = on_command("桌游封车",priority=11,aliases={"封车"})
+@deletecar.handle()
+async def _(bot: Bot, event: GroupMessageEvent,state:T_State):
+    state['player_id'] = event.get_user_id()
+    await deletecar.send("请输入需要封车的车车ID")
+
+@deletecar.got("car_id")
+async def _(state:T_State,car_id: str = ArgPlainText("car_id"),prompt="模板"):
+    # 获取刚刚获得的user_id，这样就能跨函数使用
+    #car_id = str(state['userid'])
+    player_id = str(state['player_id'])
+    car_id = int(car_id)
+    msg_list = delete_car(car_id,player_id)
+    if msg_list[0]:
+        await deletecar.finish(msg_list[1])
+    else:
+        await deletecar.finish(msg_list[1])
+
+
+
+
+
+
 # ----------------------上传图包------------------------------
-upload_mod = on_command("上传图包",priority=10,)
+upload_mod = on_fullmatch("上传图包",priority=10,)
 
 @upload_mod.handle()
 async def _(bot: Bot, event: MessageEvent,state:T_State):
@@ -584,7 +630,8 @@ async def _():
 lihuahelp = on_command("梨花命令",block=True, priority=10,aliases={"梨花指令","梨花帮助文档","梨花酱 指令","梨花酱指令","梨花帮助","梨花文档","梨花help"})
 @lihuahelp.handle()
 async def _():
-    help_msg = """梨花的使用命令:
+    help_title = """梨花的使用命令:"""
+    help_msg = """
     桌游功能：          
     ‘桌游查询 XXX’       查询XXX桌游信息
     ‘图包查询 XXX’       查询XXX图包信息
@@ -605,13 +652,17 @@ async def _():
     ‘疯狂星期四’    随机发送疯狂星期四文案
     ‘.send +内容’   可以直接和bot作者对话，提出意见建议
     """
+    # 渲染成图片
+    help_msg = msg_word2pic(help_title,help_msg)
+
     await lihuahelp.finish(help_msg)
 
 # 管理员命令
 lihua_cmdhelp = on_command("梨花管理员命令",permission=GROUP_ADMIN|GROUP_OWNER|SUPERUSER,block=True, priority=10,aliases={"梨花管理员指令","梨花管理员帮助文档","梨花酱 管理员指令","梨花酱管理员指令","梨花管理员帮助","梨花管理员文档","梨花管理员help","梨花help管理员"})
 @lihua_cmdhelp.handle()
 async def _():
-    help_msg = """梨花的管理员命令:
+    help_title = """梨花的管理员命令:"""
+    help_msg = """
     白名单管理：
     lihua_wl add  添加会话至白名单
     lihua_wl del  移出会话自白名单
@@ -627,6 +678,8 @@ async def _():
     lihua_search_car on/off        开启/关闭桌游查车
     lihua_broadcastruncar on/off   开启/关闭本群的多群广播接收功能
     """
+    # 渲染成图片
+    help_msg = msg_word2pic(help_title,help_msg)
     await lihua_cmdhelp.finish(help_msg)
 
 # ------------------欢迎新群友----------------
@@ -658,26 +711,13 @@ async def _(bot: Bot, event: MessageEvent):
     msg_list = []
     msgs = []
     try:
-        if isinstance(event, PrivateMessageEvent):
-            for group in group_list:
-                message = message+f"\n群名称："+group["group_name"]
-            await search_group_list.send(message)
-        elif isinstance(event, GroupMessageEvent):
-            msg_list.append(message)
-            for group in group_list:
-                message = f"群名称："+group["group_name"]
-                msg_list.append(message)
-            for msg in msg_list:
-                msgs.append({
-                    'type': 'node',
-                    'data': {
-                    'name': "梨花酱",
-                    'uin': bot.self_id,
-                    'content': msg
-                    }
-                })
-            await bot.call_api('send_group_forward_msg', group_id=event.group_id, messages=msgs)
-        #若发送失败
+        for group in group_list:
+            message = message+f"\n群名称："+group["group_name"]
+
+        #测试list渲染
+        test_str = "".join(message)
+        picmsg = msg_word2pic("",test_str)
+        await search_group_list.send(picmsg)
     except ActionFailed as F:
         logger.warning(F)
         await search_car.finish(
@@ -939,3 +979,45 @@ async def _(state:T_State,rename: str = ArgPlainText("rename"),prompt="rename"):
     playerid =state['playerid']
     player_rename(playerid,rename)
     await run_car.finish(f"您的新昵称{rename}已修改完毕~")
+
+
+
+
+
+
+
+
+
+
+
+
+# -----------------------测试信息-图片发送功能-----------------------
+
+test = on_command("测试",permission=SUPERUSER,priority=11)
+@test.handle()
+async def _(bot: Bot, event: MessageEvent,state:T_State):
+
+    help_msg = """
+    白名单管理：
+    lihua_wl add  添加会话至白名单
+    lihua_wl del  移出会话自白名单
+    
+    黑名单管理：    
+    lihua_wl add  添加会话至黑名单
+    lihua_wl del  移出会话自黑名单
+
+    桌游功能权限：
+    lihua_search_boardgame on/off  开启/关闭桌游查询
+    lihua_search_mod on/off        开启/关闭图包查询
+    lihua_run_car on/off           开启/关闭桌游发车
+    lihua_search_car on/off        开启/关闭桌游查车
+    lihua_broadcastruncar on/off   开启/关闭本群的多群广播接收功能
+    """
+    title = '梨花的管理员命令:'
+    text = help_msg
+    font_size = 20
+    txt2img = Txt2Img()
+    txt2img.set_font_size(font_size)
+    pic = txt2img.draw(title, text)
+    msg = MessageSegment.image(pic)
+    await test.send(msg)

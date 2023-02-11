@@ -185,16 +185,15 @@ def get_tubaoinfo(tubao_id):
     except:
         return [False,error, f"查询失败啦！是不是命令记得不清楚呀？发送“梨花命令”这四个字查看所有命令哦~"]
 
-def runcar(user_id,content,deadline):
+def runcar(play_id,content,deadline):
     # 连接数据库
     conn = sqlite3.connect(
        Path(os.path.join(os.path.dirname(__file__), "resource"))/"zhuoyou.db")
     # 创建游标
     #conn = sqlite3.connect(r'D:\Github\LihuaBot\nb2\LihuaBot\src\plugins\nonebot_plugin_zhuoyouchaxun\resource\zhuoyou.db')
     cur = conn.cursor()
-    f"INSERT INTO cheche VALUES({user_id},{content})"
     cur.execute(
-        f"INSERT INTO cheche VALUES('{user_id}','{content}','{deadline}')"
+        f"INSERT INTO cheche(player_id,content,time) VALUES('{play_id}','{content}','{deadline}')"
     ) 
     #提交事务
     conn.commit()
@@ -219,7 +218,7 @@ def uploadmod(upload_id,mod_name,link):
 
 
 
-
+# -----查车
 def searchcar():
     data = []
     msg = []
@@ -241,7 +240,7 @@ def searchcar():
         else:
             data.append(True)
             for i in range(len(db_data)):
-                time_str = db_data[i][2]
+                time_str = db_data[i][3]
                 time_str = time_str.replace("：", ":")
                 #time_format = datetime.strptime(time_str, '%H:%M')
                 now = datetime.now()
@@ -249,10 +248,12 @@ def searchcar():
 
                 if time_str >= time_now:
                     msg = (
-                    "--------------------\n"
-                    +db_data[i][1]
-                    + "\n截止时间："
+                    "--------------------\n车车ID："
+                    + str(db_data[i][0])
+                    + "\n"
                     + db_data[i][2]
+                    + "\n截止时间："
+                    + db_data[i][3]
                     + "\n--------------------"
                         )
                     msg_list.append(msg)
@@ -263,6 +264,41 @@ def searchcar():
 
     except:
         return [False,error, f"查询失败啦！是不是命令记得不清楚呀？发送“梨花命令”这四个字查看所有命令哦~"]
+
+# -----封车
+def delete_car(carid,playerid):
+    conn = sqlite3.connect(
+       Path(os.path.join(os.path.dirname(__file__), "resource"))/"zhuoyou.db")
+    # 创建游标
+    #conn = sqlite3.connect(r'D:\Github\LihuaBot\nb2\LihuaBot\src\plugins\nonebot_plugin_zhuoyouchaxun\resource\zhuoyou.db')
+    cur = conn.cursor()
+    cursor = cur.execute(
+        f"SELECT * from cheche "
+    ) 
+    db_data = cur.fetchall()
+    if db_data == []:
+        conn.close()
+        return [False,"现在车库里没有车车可以封噢"]
+    cursor = cur.execute(
+        f"SELECT car_id,player_id from cheche WHERE (car_id ='{carid}'AND player_id = '{playerid}')"
+    ) 
+    db_data = cur.fetchall()
+    if db_data:
+        cur.execute(
+            f"DELETE FROM cheche WHERE car_id ='{carid}'"
+        )
+        conn.commit()
+        conn.close()
+        return [True,"梨花已经把你发的车封了哦~"] 
+    else: 
+        conn.close()
+        return [False,"不可以封别人的车车哦！梨花不喜欢你了！"] 
+
+
+
+
+
+
 
 # ---总车库记录信息
 def add_garage(player_id,content,group_id,real_time):
@@ -278,8 +314,7 @@ def add_garage(player_id,content,group_id,real_time):
     #提交事务
     conn.commit()
     conn.close()
-     ### -发完车的广播功能未写
 
 
-    
+
     
