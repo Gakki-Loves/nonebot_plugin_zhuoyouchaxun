@@ -119,7 +119,7 @@ def get_tubaoname(tubao_name):
     cur = conn.cursor()
     # 通过cur.execute执行sql语句，操作数据库
     cursor = cur.execute(
-        f"SELECT tubao_id,tubao_name, file_name  from tubao WHERE (tubao_name like '%{tubao_name}%' or file_name like '%{tubao_name}%' ) "
+        f"SELECT tubao_id,tubao_name, file_name  from tubao WHERE (tubao_name like '%{tubao_name}%' or file_name like '%{tubao_name}%' ) and (deleted=0) "
     )
     # 得到查询结果
     db_data = cur.fetchall()
@@ -158,14 +158,13 @@ def get_tubaoinfo(tubao_id):
     cur = conn.cursor()
     # 通过cur.execute执行sql语句，操作数据库
     cursor = cur.execute(
-        f"SELECT * from tubao WHERE tubao_id like '{tubao_id}' "
+        f"SELECT * from tubao WHERE (tubao_id like '{tubao_id}') and (deleted=0) "
     )
     # 得到查询结果
     db_data = cur.fetchall()
 
     # 断开数据库连接
     conn.close()
-
     # 如果没有结果
     try:
         if db_data == []:
@@ -181,9 +180,35 @@ def get_tubaoinfo(tubao_id):
             )
             data.append(msg)
             return [data]
-
     except:
         return [False,error, f"查询失败啦！是不是命令记得不清楚呀？发送“梨花命令”这四个字查看所有命令哦~"]
+
+#根据图包id删除图包（把数据库的deleted置为1）
+def deletemod(tubao_id):
+    data = []
+    # 连接数据库
+    conn = sqlite3.connect(
+       Path(os.path.join(os.path.dirname(__file__), "resource"))/"zhuoyou.db")
+    # 创建游标
+    #conn = sqlite3.connect(r'D:\Github\LihuaBot\nb2\LihuaBot\src\plugins\nonebot_plugin_zhuoyouchaxun\resource\zhuoyou.db')
+    cur = conn.cursor()
+    # 通过cur.execute执行sql语句，操作数据库
+
+    # 更新数据库
+    cur.execute(f"UPDATE tubao SET deleted=1 WHERE (tubao_id like '{tubao_id}') and (deleted=0) ")
+    db_data = cur.fetchone()
+   
+    conn.commit()#更新时要提交才行
+    conn.close() # 断开数据库连接
+    # 如果没有结果
+    #之后知道update的返回值是什么了之后再来做异常判定
+    '''try:
+        if db_data == []:
+            return 1
+        else:
+            return 2
+    except:
+        return 3'''
 
 def runcar(user_id,content,deadline):
     # 连接数据库
