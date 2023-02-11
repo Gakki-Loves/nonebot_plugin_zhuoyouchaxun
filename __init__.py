@@ -538,11 +538,16 @@ async def _(bot: Bot,state:T_State,event: GroupMessageEvent,link: str = ArgPlain
     #获取刚刚获得的上传人id和图包名字
     mod_name = str(state['mod_name'])
     upload_id = str(state['upload_id'])
-    uploadmod(upload_id,mod_name,link)
-    await upload_mod.send("上传图包完毕~感谢你为桌游图书馆做出的贡献~")
+    matchObj = re.match(r"^https://.*|http://.*$", link, re.I)#对link（链接）正则匹配以“https://”或“http://”开头的链接
+    if(matchObj!=None):# 如果上面这个re.match函数匹配到东西了，也就是matchObj的结果不为None那说明用户输入的链接是正确的
+        uploadmod(upload_id,mod_name,link)
+        await upload_mod.send("上传图包完毕~感谢您为桌游图书馆做出的贡献~")
+    else:
+        await run_car.finish("链接格式是不是填错啦~请输入“上传图包”重新操作哦~")
+    
     # ------
     # 这里其实可以加一个对link的正则匹配，得是https://开头的（网盘应该不会有http协议）
-    # ------
+    # ------await run_car.finish("敲你脑袋哦！时间填错啦！请输入“桌游发车”重新操作哦~")
 
     
 
