@@ -527,6 +527,7 @@ async def _(bot: Bot, event: MessageEvent,state:T_State):
 
 # -----------------------------------------------------
 
+
 # ----------------------封车------------------------------
 deletecar = on_command("桌游封车",priority=11,aliases={"封车"})
 @deletecar.handle()
