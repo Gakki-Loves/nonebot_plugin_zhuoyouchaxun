@@ -186,6 +186,7 @@ def get_tubaoinfo(tubao_id):
         return [False,error, f"查询失败啦！是不是命令记得不清楚呀？发送“梨花命令”这四个字查看所有命令哦~"]
 
 def runcar(play_id,content,deadline):
+
     # 连接数据库
     conn = sqlite3.connect(
        Path(os.path.join(os.path.dirname(__file__), "resource"))/"zhuoyou.db")
