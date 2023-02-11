@@ -257,11 +257,11 @@ class PermissionManager:
         if broadcastruncar:
             self.cfg[sessionId]['broadcastruncar'] = True
             self.WriteCfg()
-            return f'成功开启群号为{sessionId}的多群广播接收权限，该群不会收到多群广播的信息了'
+            return f'成功开启群号为{sessionId}的多群广播接收权限'
         else:
             self.cfg[sessionId]['broadcastruncar'] = False
             self.WriteCfg()
-            return f'成功关闭群号为{sessionId}的多群广播接收权限，该群不会收到多群广播的信息了'
+            return f'成功关闭群号为{sessionId}的多群广播权限'
     # 黑名单部分
     # add_mode = True，加入黑名单；add_mode = False，移除黑名单
     def UpdateBanList(self,sessionId:str,add_mode:bool):
