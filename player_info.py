@@ -2,7 +2,7 @@
 Author: Gakkilove 739150373@qq.com
 Date: 2023-02-09 23:32:23
 LastEditors: Gakkilove 739150373@qq.com
-LastEditTime: 2023-02-12 10:55:31
+LastEditTime: 2023-02-12 11:29:05
 FilePath: \nonebot_plugin_zhuoyouchaxun\player_info.py
 Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
 '''
@@ -71,6 +71,7 @@ def player_rename(player_id,rename):
     #提交事务
     conn.commit()
     conn.close()
+
 
 
 
