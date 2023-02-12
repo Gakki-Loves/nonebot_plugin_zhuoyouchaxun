@@ -130,11 +130,11 @@ async def _(bot: Bot, event: MessageEvent,state: T_State):
     playerid = event.get_user_id()
     info = player_exist(playerid)
     if info:
-        await chaxun.send("测试信息")
+        pass
     else:
         playername = json.loads(json.dumps(await bot.get_stranger_info(user_id =int(playerid))))['nickname']
         player_init(playerid,playername)
-        await chaxun.send("测试信息")
+
 
 
     # ---逻辑部分
@@ -174,9 +174,9 @@ async def _(bot: Bot, event: MessageEvent,state: T_State):
                     await chaxun.send(msg)
                     #await asyncio.sleep(0.5)
             elif isinstance(event, GroupMessageEvent):
-                for msg in message_list:
-                    await chaxun.send(msg)
-                """msgs = []
+                #for msg in message_list:
+                    #await chaxun.send(msg)
+                msgs = []
                 for msg in message_list:
                     msgs.append({
                     'type': 'node',
@@ -186,7 +186,7 @@ async def _(bot: Bot, event: MessageEvent,state: T_State):
                         'content': msg
                     }
                     })
-                await bot.call_api('send_group_forward_msg', group_id=event.group_id, messages=msgs)"""
+                await bot.call_api('send_group_forward_msg', group_id=event.group_id, messages=msgs)
         elif state['ifchaxun'] == False:
             for msg in message_list:
                     #await chaxun.send(msg)
@@ -269,11 +269,10 @@ async def _(bot: Bot, event: MessageEvent,state: T_State):
     playerid = event.get_user_id()
     info = player_exist(playerid)
     if info:
-        await tubao.send("测试信息")
+        pass
     else:
         playername = json.loads(json.dumps(await bot.get_stranger_info(user_id =int(playerid))))['nickname']
         player_init(playerid,playername)
-        await tubao.send("测试信息")
 
     
     args = list(state["_matched_groups"])
@@ -390,11 +389,11 @@ async def _(bot: Bot, event: MessageEvent,state:T_State):
     playerid = event.get_user_id()
     info = player_exist(playerid)
     if info:
-        await run_car.send("测试信息")
+        pass
     else:
         playername = json.loads(json.dumps(await bot.get_stranger_info(user_id =int(playerid))))['nickname']
         player_init(playerid,playername)
-        await run_car.send("测试信息")
+    
 
     # 用state字典把这里获取的user_id保存
     state['userid'] = str(event.user_id)
@@ -508,12 +507,11 @@ async def _(bot: Bot, event: MessageEvent,state:T_State):
     playerid = event.get_user_id()
     info = player_exist(playerid)
     if info:
-        await search_car.send("测试信息")
+        pass
     else:
         playername = json.loads(json.dumps(await bot.get_stranger_info(user_id =int(playerid))))['nickname']
         player_init(playerid,playername)
-        await search_car.send("测试信息")
-
+        
     # 用state字典把这里获取的user_id保存
     message_searchcar = searchcar()
     # 消息发送列表
@@ -614,12 +612,11 @@ async def _(bot: Bot, event: MessageEvent,state:T_State):
     playerid = event.get_user_id()
     info = player_exist(playerid)
     if info:
-        await upload_mod.send("测试信息")
+        pass
     else:
         playername = json.loads(json.dumps(await bot.get_stranger_info(user_id =int(playerid))))['nickname']
         player_init(playerid,playername)
-        await upload_mod.send("测试信息")
-
+        
     # 用state字典把这里获取的user_id保存
     state['upload_id'] = str(event.user_id)
     await upload_mod.send("请输入你上传图包的图包名字\n例如“王权骰铸/瞎几把投/侠技霸骰”\n（PS：可以把你知道的别名都写上去哦~）")
@@ -690,6 +687,7 @@ async def _():
     ‘图包查询 XXX’       查询XXX图包信息
     ‘桌游查车’/‘查车’    查询正在进行的桌游车
     ‘桌游发车’/‘发车’    你来开一辆车
+    ‘桌游封车’/‘封车’    只可以封自己发的车车哦
     ‘上传图包’           把你的图包链接上传至数据库
     (发送”桌游发车“梨花可以把你的约车信息广播到几十个群哦)
 
@@ -697,6 +695,7 @@ async def _():
     （仍在开发，涉及到后续的金币系统和梨花好感度系统）
     “玩家初始化”        初始化你的个人信息
     “修改昵称”          修改梨花对你的称谓
+    “查询个人信息”      康康你和梨花的好感度是多少吧！
 
     其他功能：
     ‘XX天气’        查询XX未来几天的天气
