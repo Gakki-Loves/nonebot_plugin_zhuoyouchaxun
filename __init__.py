@@ -38,7 +38,7 @@ from .permission_manager import PermissionManager
 
 from  nonebot . params  import  Arg ,  CommandArg ,  ArgPlainText 
 from .get_data import get_idname,get_BGinfo,get_tubaoname,get_tubaoinfo,runcar,searchcar,uploadmod,add_garage,delete_car
-from .player_info import player_init,player_exist,player_rename
+from .player_info import player_init,player_exist,player_rename,player_search_info
 
 
 
@@ -103,6 +103,8 @@ def msg_word2pic(wordtitle,wordmsg):
     return picmsg
 
 
+
+
 # --------------发送查询信息部分-----------------
 # 桌游查询的正则表达式
 chaxun = on_regex(
@@ -123,6 +125,17 @@ async def _(bot: Bot, event: MessageEvent,state: T_State):
     cmd_search_boardgame = pm.Query_search_boardgame(state['sid'])
     if cmd_search_boardgame == False:
         await chaxun.finish("桌游查询功能没有开启哦~")
+
+    # 进行梨花身份信息的创建
+    playerid = event.get_user_id()
+    info = player_exist(playerid)
+    if info:
+        await chaxun.send("测试信息")
+    else:
+        playername = json.loads(json.dumps(await bot.get_stranger_info(user_id =int(playerid))))['nickname']
+        player_init(playerid,playername)
+        await chaxun.send("测试信息")
+
 
     # ---逻辑部分
     args = list(state["_matched_groups"])
@@ -250,8 +263,19 @@ async def _(bot: Bot, event: MessageEvent,state: T_State):
         state['sid'] = 'group_' + str(event.group_id)
     cmd_search_boardgame = pm.Query_search_mod(state['sid'])
     if cmd_search_boardgame == False:
-        await chaxun.finish("图包查询功能没有开启哦~")
+        await tubao.finish("图包查询功能没有开启哦~")
 
+    # 进行梨花身份信息的创建
+    playerid = event.get_user_id()
+    info = player_exist(playerid)
+    if info:
+        await tubao.send("测试信息")
+    else:
+        playername = json.loads(json.dumps(await bot.get_stranger_info(user_id =int(playerid))))['nickname']
+        player_init(playerid,playername)
+        await tubao.send("测试信息")
+
+    
     args = list(state["_matched_groups"])
     tubao_name = args[1]  #读取桌游名称
 
@@ -362,6 +386,16 @@ async def _(bot: Bot, event: MessageEvent,state:T_State):
     if cmd_search_boardgame == False:
         await chaxun.finish("桌游发车功能没有开启哦~")
 
+    # 进行梨花身份信息的创建
+    playerid = event.get_user_id()
+    info = player_exist(playerid)
+    if info:
+        await run_car.send("测试信息")
+    else:
+        playername = json.loads(json.dumps(await bot.get_stranger_info(user_id =int(playerid))))['nickname']
+        player_init(playerid,playername)
+        await run_car.send("测试信息")
+
     # 用state字典把这里获取的user_id保存
     state['userid'] = str(event.user_id)
     await run_car.send("请输入发车信息，例如：\n《桌游名》\n【人数】X=X\n【教学】带教学\n【类型】美式/战斗\n【时长】教15分钟；玩60分钟\n【扩展】不带扩\n【难度】bgg(2.03 / 5)；集石(4/10)\n【房名】XXX\n【密码】XXX\n【语音】https://kook.top/XXX\nPS： 这是一辆车车的模板")
@@ -470,7 +504,15 @@ async def _(bot: Bot, event: MessageEvent,state:T_State):
     if cmd_search_boardgame == False:
         await chaxun.finish("桌游查车功能没有开启哦~")
 
-
+    # 进行梨花身份信息的创建
+    playerid = event.get_user_id()
+    info = player_exist(playerid)
+    if info:
+        await search_car.send("测试信息")
+    else:
+        playername = json.loads(json.dumps(await bot.get_stranger_info(user_id =int(playerid))))['nickname']
+        player_init(playerid,playername)
+        await search_car.send("测试信息")
 
     # 用state字典把这里获取的user_id保存
     message_searchcar = searchcar()
@@ -567,6 +609,16 @@ async def _(bot: Bot, event: MessageEvent,state:T_State):
     #cmd_search_boardgame = pm.Query_run_car(state['sid'])
     #if cmd_search_boardgame == False:
         #await chaxun.finish("桌游发车功能没有开启哦~")
+
+    # 进行梨花身份信息的创建
+    playerid = event.get_user_id()
+    info = player_exist(playerid)
+    if info:
+        await upload_mod.send("测试信息")
+    else:
+        playername = json.loads(json.dumps(await bot.get_stranger_info(user_id =int(playerid))))['nickname']
+        player_init(playerid,playername)
+        await upload_mod.send("测试信息")
 
     # 用state字典把这里获取的user_id保存
     state['upload_id'] = str(event.user_id)
@@ -951,7 +1003,7 @@ async def _(bot: Bot, event: Event):
 
 # +------------------------玩家信息区-------------------------+
 # -----玩家初始化
-playerinit = on_fullmatch("玩家初始化",priority=10)
+playerinit = on_fullmatch("玩家初始化",priority=90)
 @playerinit.handle()
 async def _(bot: Bot, event: Event):
     playerid = event.get_user_id()
@@ -966,7 +1018,7 @@ async def _(bot: Bot, event: Event):
 
 
 # -----玩家修改昵称
-playerrename = on_fullmatch("修改昵称",priority=10)
+playerrename = on_fullmatch("修改昵称",priority=90)
 @playerrename.handle()
 async def _(bot: Bot, event: MessageEvent,state: T_State):
     playerid = event.get_user_id()
@@ -981,8 +1033,21 @@ async def _(state:T_State,rename: str = ArgPlainText("rename"),prompt="rename"):
     player_rename(playerid,rename)
     await run_car.finish(f"您的新昵称{rename}已修改完毕~")
 
-
-
+# -----查询个人信息
+playersearchinfo = on_fullmatch("查询个人信息",priority=90)
+@playersearchinfo.handle()
+async def _(bot: Bot, event: MessageEvent,state: T_State):
+    playerid = event.get_user_id()
+    state['playerid'] = playerid
+    data = player_search_info(playerid)
+    if data:
+        msg = f"昵称：{data[0][1]}\n金币：{data[0][2]}\n梨花好感度：{data[0][3]}\n"
+        await playersearchinfo.finish(msg)
+    else:
+        # 没创建，帮他创建一个
+        playername = json.loads(json.dumps(await bot.get_stranger_info(user_id =int(playerid))))['nickname']
+        player_init(playerid,playername)
+        await playersearchinfo.send("您还没有注册过玩家信息哦~\n梨花已经帮您注册啦，请再次查询~")
 
 
 

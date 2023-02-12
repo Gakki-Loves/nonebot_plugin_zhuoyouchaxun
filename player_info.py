@@ -1,11 +1,11 @@
-"""
+'''
 Author: Gakkilove 739150373@qq.com
 Date: 2023-02-09 23:32:23
 LastEditors: Gakkilove 739150373@qq.com
-LastEditTime: 2023-02-09 23:33:04
+LastEditTime: 2023-02-12 10:55:31
 FilePath: \nonebot_plugin_zhuoyouchaxun\player_info.py
 Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
-"""
+'''
 
 # +------------------------import区-------------------------+
 import os
@@ -52,6 +52,7 @@ def player_exist(player_id):
     #提交事务
     conn.commit()
     conn.close()
+    # 存在返回True，否则False
     if db_data:
             return True
     else:
@@ -70,3 +71,29 @@ def player_rename(player_id,rename):
     #提交事务
     conn.commit()
     conn.close()
+
+
+
+
+
+# +------------------------查询区-------------------------+
+# -----查询个人信息
+def player_search_info(player_id):
+    # 连接数据库
+    conn = sqlite3.connect(
+       Path(os.path.join(os.path.dirname(__file__), "resource"))/"zhuoyou.db")
+    # 创建游标
+    #conn = sqlite3.connect(r'D:\Github\LihuaBot\nb2\LihuaBot\src\plugins\nonebot_plugin_zhuoyouchaxun\resource\zhuoyou.db')
+    cur = conn.cursor()
+    cur.execute(
+        f"SELECT * from player WHERE player_id = '{player_id}' "
+    ) 
+    db_data = cur.fetchall()
+    #提交事务
+    conn.commit()
+    conn.close()
+    # 存在返回True，否则False
+    if db_data:
+            return db_data
+    else:
+            return False
