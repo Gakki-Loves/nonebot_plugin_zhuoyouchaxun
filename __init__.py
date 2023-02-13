@@ -961,13 +961,27 @@ async def _(state: T_State):
         await broadcastruncar.reject(f"无效目标对象: {sid}")
     await broadcastruncar.finish(pm.Update_broadcastruncar(sid,state['broadcastruncar']))
 
-# 先自动审批加群信息，懒
-auto_req = on_request(priority =1,  block =True)
+# 自动审批加群信息，懒
+auto_req = on_request()
 @auto_req.handle()
 async def _(bot:Bot,event : GroupRequestEvent):
-    # 自动同意别人的邀请
-    await event.approve(bot)
-
+    group_id = str(event.group_id)
+    if group_id == "177053575":
+        raw  = json . loads ( event . json ()) 
+        gid  = str ( event . group_id ) 
+        flag  = raw ['flag' ]
+        sub_type  = raw ['sub_type' ]
+        logger . info ( 'flag:' ,  str ( flag )) 
+        if  sub_type  == 'add' : 
+            uid  = event . user_id 
+            comment  = raw ['comment' ]
+            word  = re . findall ( re . compile ( '答案：(.*)'),  comment ) 
+            logger . info ( f"同意{uid }加入群 {gid },验证消息为 “{word }”") 
+            await bot.set_group_add_request(flag =flag , 
+                sub_type =sub_type , 
+                approve =True , 
+                reason =' ' , )
+            await  bot . send_msg ( user_id =int ( "739150373"),  message =f"同意{uid }加入群 {gid },验证消息为 “{word }”") 
 
 
 
