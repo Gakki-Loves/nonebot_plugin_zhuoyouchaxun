@@ -39,7 +39,7 @@ from .permission_manager import PermissionManager
 
 from  nonebot . params  import  Arg ,  CommandArg ,  ArgPlainText 
 from .get_data import get_idname,get_BGinfo,get_tubaoname,get_tubaoinfo,runcar,searchcar,uploadmod,add_garage,delete_car
-from .player_info import player_init,player_exist,player_rename,player_search_info
+from .player_info import player_init,player_exist,player_rename,player_search_info,player_search_nickname
 
 
 
@@ -394,10 +394,12 @@ async def _(bot: Bot, event: MessageEvent,state:T_State):
     else:
         playername = json.loads(json.dumps(await bot.get_stranger_info(user_id =int(playerid))))['nickname']
         player_init(playerid,playername)
-    
 
-    # 用state字典把这里获取的user_id保存
+    # 用state字典把这里获取的user_id、昵称保存
+    #playername = json.loads(json.dumps(await bot.get_stranger_info(user_id =int(playerid))))['nickname']
+    playername = player_search_nickname(playerid)
     state['userid'] = str(event.user_id)
+    state['playername'] = str(playername[0][0])
     await run_car.send("请输入发车信息，例如：\n《桌游名》\n【人数】X=X\n【教学】带教学\n【类型】美式/战斗\n【时长】教15分钟；玩60分钟\n【扩展】不带扩\n【难度】bgg(2.03 / 5)；集石(4/10)\n【房名】XXX\n【密码】XXX\n【语音】https://kook.top/XXX\nPS： 这是一辆车车的模板")
 
 @run_car.got("content")
@@ -446,13 +448,15 @@ async def _(bot: Bot,state:T_State,event: GroupMessageEvent,deadline: str = ArgP
     player_id = str(state['userid'])
     content = str(state['content'])
     group_id = str(event.group_id)
+    playername = str(state['playername'])
     add_garage(player_id,content,group_id,now)
     # ---写进garage库部分
 
 
     # 判断是否为主群
     group_id = str(event.group_id)
-    if group_id == "177053575":
+    if group_id == "177053575" :
+    # if group_id == "373939194":
         if cmd_broad_cast == True:
             # 这里要判断各个群是否开启了接收多群广播功能
             # 没开的就不发送开车信息
@@ -470,7 +474,7 @@ async def _(bot: Bot,state:T_State,event: GroupMessageEvent,deadline: str = ArgP
                 cmd_broadcast = pm.Query_broadcastruncar(sessionId)
                 if cmd_broadcast:
                     onBroadCastGroupNum+=1
-                    await bot.send_group_msg(group_id=group["group_id"], message=(content+"\n截止时间："+deadline+"\n这条是多群广播信息，第二轮测试期间，发车信息被多群广播只有在梨花的图书馆（群号：177053575）才可以使用哦！"))
+                    await bot.send_group_msg(group_id=group["group_id"], message=(content+"\n截止时间："+deadline+"\n发车人："+playername+"\n这条是多群广播信息，第二轮测试期间，发车信息被多群广播只有在梨花的图书馆（群号：177053575）才可以使用哦！"))
                     await asyncio.sleep(1)
             await run_car.finish(f"梨花一共加入了{allGroupNum}个群，已经帮您广播转发到了{onBroadCastGroupNum}个群，其余群关闭了接收广播功能~")
         elif cmd_broad_cast == False:
@@ -762,8 +766,6 @@ search_group_list = on_command("查看群列表",permission=SUPERUSER)
 async def _(bot: Bot, event: MessageEvent):
     group_list = await bot.get_group_list()
     message = f"梨花已加入的群~"
-    msg_list = []
-    msgs = []
     try:
         for group in group_list:
             message = message+f"\n群名称："+group["group_name"]
