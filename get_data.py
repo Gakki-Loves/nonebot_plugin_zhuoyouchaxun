@@ -119,7 +119,7 @@ def get_tubaoname(tubao_name):
     cur = conn.cursor()
     # 通过cur.execute执行sql语句，操作数据库
     cursor = cur.execute(
-        f"SELECT tubao_id,tubao_name, file_name  from tubao WHERE (tubao_name like '%{tubao_name}%' or file_name like '%{tubao_name}%' ) "
+        f"SELECT tubao_id,tubao_name, file_name ,display from tubao WHERE ((tubao_name like '%{tubao_name}%' or file_name like '%{tubao_name}%') and display like 'True') "
     )
     # 得到查询结果
     db_data = cur.fetchall()
@@ -168,7 +168,7 @@ def get_tubaoinfo(tubao_id):
 
     # 如果没有结果
     try:
-        if db_data == []:
+        if db_data == []  :
             data.append([False,error, f"梨花酱没有搜到图包ID:{tubao_id}的信息呢~请发送“图包查询 XXX”重新查询哦"])
             return data
         else:
@@ -185,6 +185,7 @@ def get_tubaoinfo(tubao_id):
     except:
         return [False,error, f"查询失败啦！是不是命令记得不清楚呀？发送“梨花命令”这四个字查看所有命令哦~"]
 
+# -----发车
 def runcar(play_id,content,deadline):
 
     # 连接数据库
@@ -201,7 +202,7 @@ def runcar(play_id,content,deadline):
     conn.close()
      ### -发完车的广播功能未写
 
-
+# -----上传图包
 def uploadmod(upload_id,mod_name,link):
     # 连接数据库
     conn = sqlite3.connect(
@@ -210,14 +211,28 @@ def uploadmod(upload_id,mod_name,link):
     #conn = sqlite3.connect(r'D:\Github\LihuaBot\nb2\LihuaBot\src\plugins\nonebot_plugin_zhuoyouchaxun\resource\zhuoyou.db')
     cur = conn.cursor()
     cur.execute(
-        f"INSERT INTO tubao(tubao_name,file_name,link,upload_id) VALUES('{mod_name}','{mod_name}','{link}','{upload_id}')"
+        f"INSERT INTO tubao(tubao_name,file_name,link,upload_id,display) VALUES('{mod_name}','{mod_name}','{link}','{upload_id}','True')"
     ) 
     #提交事务
     conn.commit()
     conn.close()
      ### -发完车的广播功能未写
 
-
+# -----删除（隐藏）图包
+def delete_mod(mod_id):
+    # 连接数据库
+    conn = sqlite3.connect(
+       Path(os.path.join(os.path.dirname(__file__), "resource"))/"zhuoyou.db")
+    # 创建游标
+    #conn = sqlite3.connect(r'D:\Github\LihuaBot\nb2\LihuaBot\src\plugins\nonebot_plugin_zhuoyouchaxun\resource\zhuoyou.db')
+    cur = conn.cursor()
+    cur.execute(
+        f"UPDATE tubao SET display = 'False' WHERE tubao_id = '{mod_id}'"
+    ) 
+    #提交事务
+    conn.commit()
+    conn.close()
+     ### -发完车的广播功能未写
 
 # -----查车
 def searchcar():

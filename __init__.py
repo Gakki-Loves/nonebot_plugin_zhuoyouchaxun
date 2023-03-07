@@ -38,7 +38,7 @@ from nonebot.permission import SUPERUSER
 from .permission_manager import PermissionManager
 
 from  nonebot . params  import  Arg ,  CommandArg ,  ArgPlainText 
-from .get_data import get_idname,get_BGinfo,get_tubaoname,get_tubaoinfo,runcar,searchcar,uploadmod,add_garage,delete_car
+from .get_data import get_idname,get_BGinfo,get_tubaoname,get_tubaoinfo,runcar,searchcar,uploadmod,add_garage,delete_car,delete_mod
 from .player_info import player_init,player_exist,player_rename,player_search_info,player_search_nickname
 
 
@@ -648,6 +648,17 @@ async def _(bot: Bot,state:T_State,event: GroupMessageEvent,link: str = ArgPlain
 
     
 
+# ----------------------图包删除------------------------------
+deletemod = on_command("图包删除",priority=11,aliases={"删除图包"},permission=SUPERUSER)
+@deletemod.handle()
+async def _(bot: Bot, event: MessageEvent,state:T_State):
+    await deletemod.send("请输入需要删除的图包ID")
+
+@deletemod.got("mod_id")
+async def _(state:T_State,mod_id: str = ArgPlainText("mod_id"),prompt="图包ID"):
+    mod_id = int(mod_id)
+    msg_list = delete_mod(mod_id)
+    await deletemod.finish("梨花已经把图包已经删除咯~")
 
 
 
@@ -1076,11 +1087,33 @@ async def _(bot: Bot, event: MessageEvent,state: T_State):
 
 # -----------------------测试信息-图片发送功能-----------------------
 
-test = on_command("测试",permission=SUPERUSER,priority=11)
+test = on_command("梨花超级用户命令",permission=SUPERUSER,priority=11)
 @test.handle()
 async def _(bot: Bot, event: MessageEvent,state:T_State):
 
     help_msg = """
+    桌游功能：          
+    ‘桌游查询 XXX’       查询XXX桌游信息
+    ‘图包查询 XXX’       查询XXX图包信息
+    ‘桌游查车’/‘查车’    查询正在进行的桌游车
+    ‘桌游发车’/‘发车’    你来开一辆车
+    ‘桌游封车’/‘封车’    只可以封自己发的车车哦
+    ‘上传图包’           把你的图包链接上传至数据库
+    (发送”桌游发车“梨花可以把你的约车信息广播到几十个群哦)
+
+    个人信息功能
+    （仍在开发，涉及到后续的金币系统和梨花好感度系统）
+    “玩家初始化”        初始化你的个人信息
+    “修改昵称”          修改梨花对你的称谓
+    “查询个人信息”      康康你和梨花的好感度是多少吧！
+
+    其他功能：
+    ‘XX天气’        查询XX未来几天的天气
+    ‘占卜/塔罗牌’   占卜功能
+    ‘人生重开’      人生重开模拟器
+    ‘疯狂星期四’    随机发送疯狂星期四文案
+    ‘.send +内容’   可以直接和bot作者对话，提出意见建议
+
     白名单管理：
     lihua_wl add  添加会话至白名单
     lihua_wl del  移出会话自白名单
@@ -1095,8 +1128,12 @@ async def _(bot: Bot, event: MessageEvent,state:T_State):
     lihua_run_car on/off           开启/关闭桌游发车
     lihua_search_car on/off        开启/关闭桌游查车
     lihua_broadcastruncar on/off   开启/关闭本群的多群广播接收功能
+    
+    超级用户功能：
+    ‘状态/status’   查看服务器状态
+    ‘图包删除’      删除某个图包
     """
-    title = '梨花的管理员命令:'
+    title = '梨花超级用户命令:'
     text = help_msg
     font_size = 20
     txt2img = Txt2Img()
