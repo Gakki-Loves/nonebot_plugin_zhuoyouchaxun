@@ -599,7 +599,7 @@ async def _(state:T_State,car_id: str = ArgPlainText("car_id"),prompt="模板"):
 
 
 # ----------------------上传图包------------------------------
-upload_mod = on_fullmatch("上传图包",priority=10,)
+upload_mod = on_fullmatch("上传图包",priority=10,aliases={"图包上传"})
 
 @upload_mod.handle()
 async def _(bot: Bot, event: MessageEvent,state:T_State):
@@ -1085,7 +1085,7 @@ async def _(bot: Bot, event: MessageEvent,state: T_State):
 
 
 
-# -----------------------测试信息-图片发送功能-----------------------
+# -----------------------梨花超级用户命令-----------------------
 
 test = on_command("梨花超级用户命令",permission=SUPERUSER,priority=11)
 @test.handle()
@@ -1132,6 +1132,7 @@ async def _(bot: Bot, event: MessageEvent,state:T_State):
     超级用户功能：
     ‘状态/status’   查看服务器状态
     ‘图包删除’      删除某个图包
+    ‘查看群列表’    查看梨花加入的群
     """
     title = '梨花超级用户命令:'
     text = help_msg
