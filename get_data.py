@@ -281,6 +281,46 @@ def searchcar():
     except:
         return [False,error, f"查询失败啦！是不是命令记得不清楚呀？发送“梨花命令”这四个字查看所有命令哦~"]
 
+# -----查询司机是否已经存在一辆车
+def ifcarexist(playerid):
+    data = []
+    msg = []
+    msg_list = []
+    conn = sqlite3.connect(
+       Path(os.path.join(os.path.dirname(__file__), "resource"))/"zhuoyou.db")
+    # 创建游标
+    #conn = sqlite3.connect(r'D:\Github\LihuaBot\nb2\LihuaBot\src\plugins\nonebot_plugin_zhuoyouchaxun\resource\zhuoyou.db')
+    cur = conn.cursor()
+    cursor = cur.execute(
+        f"SELECT * from cheche "
+    )
+    db_data = cur.fetchall()
+    conn.close
+    try:
+        if db_data == []:
+            return True
+        else:
+            for i in range(len(db_data)):
+                time_str = db_data[i][3]
+                time_str = time_str.replace("：", ":")
+                #time_format = datetime.strptime(time_str, '%H:%M')
+                now = datetime.now()
+                time_now = now.strftime('%H:%M')
+
+                if time_str >= time_now:
+                    if playerid == db_data[i][1]:
+                        return False
+                    else :
+                        pass
+
+                elif time_str < time_now:
+                    pass
+
+
+    except:
+        return True
+
+
 # -----封车
 def delete_car(carid,playerid):
     conn = sqlite3.connect(

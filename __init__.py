@@ -38,7 +38,7 @@ from nonebot.permission import SUPERUSER
 from .permission_manager import PermissionManager
 
 from  nonebot . params  import  Arg ,  CommandArg ,  ArgPlainText 
-from .get_data import get_idname,get_BGinfo,get_tubaoname,get_tubaoinfo,runcar,searchcar,uploadmod,add_garage,delete_car,delete_mod
+from .get_data import get_idname,get_BGinfo,get_tubaoname,get_tubaoinfo,runcar,searchcar,uploadmod,add_garage,delete_car,delete_mod,ifcarexist
 from .player_info import player_init,player_exist,player_rename,player_search_info,player_search_nickname
 
 
@@ -395,7 +395,14 @@ async def _(bot: Bot, event: MessageEvent,state:T_State):
         playername = json.loads(json.dumps(await bot.get_stranger_info(user_id =int(playerid))))['nickname']
         player_init(playerid,playername)
 
-    # 用state字典把这里获取的user_id、昵称保存
+    # 判定一下司机是否已经有一辆车在开了
+    data = ifcarexist(playerid)
+    if data == False:
+         await run_car.finish("一个人不可以同时开两辆车车哦！请封车后再开！")
+
+
+
+    # 用state字典把这里获取的 user_id、昵称保存
     #playername = json.loads(json.dumps(await bot.get_stranger_info(user_id =int(playerid))))['nickname']
     playername = player_search_nickname(playerid)
     state['userid'] = str(event.user_id)
@@ -599,7 +606,7 @@ async def _(state:T_State,car_id: str = ArgPlainText("car_id"),prompt="模板"):
 
 
 # ----------------------上传图包------------------------------
-upload_mod = on_fullmatch("上传图包",priority=10,aliases={"图包上传"})
+upload_mod = on_fullmatch("上传图包",priority=10)
 
 @upload_mod.handle()
 async def _(bot: Bot, event: MessageEvent,state:T_State):
