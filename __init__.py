@@ -1016,7 +1016,6 @@ async def _(bot: Bot, event: MessageEvent):
     path = Path(__file__).parent /'resource'/ "赞助梨花.png"
     # 构造图片消息段
     image = MessageSegment.image(path)
-    MessageSegment.music()
     # 发送图片
     await sponsor.finish(image)
 
