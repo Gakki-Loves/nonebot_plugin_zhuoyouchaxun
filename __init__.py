@@ -727,6 +727,8 @@ async def _():
     ‘人生重开’      人生重开模拟器
     ‘疯狂星期四’    随机发送疯狂星期四文案
     ‘.send +内容’   可以直接和bot作者对话，提出意见建议
+    ‘赞助梨花’       给梨花买一杯奶茶叭！
+
     """
     # 渲染成图片
     help_msg = msg_word2pic(help_title,help_msg)
@@ -1008,6 +1010,17 @@ async def _(bot:Bot,event : GroupRequestEvent):
 
 
 # +------------------------娱乐区-------------------------+
+sponsor = on_fullmatch("赞助梨花",priority=99)
+@sponsor.handle()
+async def _(bot: Bot, event: MessageEvent):
+    path = Path(__file__).parent /'resource'/ "赞助梨花.png"
+    # 构造图片消息段
+    image = MessageSegment.image(path)
+    MessageSegment.music()
+    # 发送图片
+    await sponsor.finish(image)
+
+    
 hitme = on_command("梨花揍我",block=True,priority=90)
 @hitme.handle()
 async def _(bot: Bot, event: Event):
