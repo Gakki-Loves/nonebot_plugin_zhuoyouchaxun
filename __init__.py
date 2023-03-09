@@ -481,7 +481,7 @@ async def _(bot: Bot,state:T_State,event: GroupMessageEvent,deadline: str = ArgP
                 cmd_broadcast = pm.Query_broadcastruncar(sessionId)
                 if cmd_broadcast:
                     onBroadCastGroupNum+=1
-                    await bot.send_group_msg(group_id=group["group_id"], message=(content+"\n截止时间："+deadline+"\n发车人："+playername+"\n这条是多群广播信息，第二轮测试期间，发车信息被多群广播只有在梨花的图书馆（群号：177053575）才可以使用哦！"))
+                    await bot.send_group_msg(group_id=group["group_id"], message=(content+"\n【截止时间】"+deadline+"\n【发车人】"+playername+"\n\n这条是多群广播信息，第二轮测试期间，发车信息被多群广播只有在梨花的图书馆（群号：177053575）才可以使用哦！"))
                     await asyncio.sleep(1)
             await run_car.finish(f"梨花一共加入了{allGroupNum}个群，已经帮您广播转发到了{onBroadCastGroupNum}个群，其余群关闭了接收广播功能~")
         elif cmd_broad_cast == False:
