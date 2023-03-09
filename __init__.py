@@ -1140,8 +1140,43 @@ async def _(bot: Bot, event: MessageEvent,state:T_State):
     ‘状态/status’   查看服务器状态
     ‘图包删除’      删除某个图包
     ‘查看群列表’    查看梨花加入的群
+    ‘梨花权限命令’    管理插件权限
     """
     title = '梨花超级用户命令:'
+    text = help_msg
+    font_size = 20
+    txt2img = Txt2Img()
+    txt2img.set_font_size(font_size)
+    pic = txt2img.draw(title, text)
+    msg = MessageSegment.image(pic)
+    await test.send(msg)
+
+
+lhpm = on_command("梨花权限命令",permission=SUPERUSER,priority=11)
+@lhpm.handle()
+async def _(bot: Bot, event: MessageEvent,state:T_State):
+
+    help_msg = """
+    lhpm ls：                      查看当前会话插件列表
+    -u <user_id>, --user <user_id>    查看指定用户插件列表
+    -g <group_id>, --group <group_id> 查看指定群插件列表
+    -a, --all                      查看所有插件
+    
+    lhpm block <plugin ...>        禁用当前会话插件
+    plugin ...                     必选参数，需要禁用的插件名
+    -a, --all                      全选插件
+    -r, --reverse                  反选插件
+    -u <user_id ...>, --user <user_id ...>    管理指定用户设置
+    -g <group_id ...>, --group <group_id ...> 管理指定群设置（仅超级用户可用）
+
+    lhpm unblock <plugin ...>      启用当前会话插件（需要权限）
+    plugin ...                     必选参数，需要禁用的插件名
+    -a, --all                      全选插件
+    -r, --reverse                  反选插件
+    -u <user_id ...>, --user <user_id ...>    管理指定用户设置（仅超级用户可用）
+    -g <group_id ...>, --group <group_id ...> 管理指定群设置（仅超级用户可用）
+    """
+    title = '梨花权限命令:'
     text = help_msg
     font_size = 20
     txt2img = Txt2Img()
