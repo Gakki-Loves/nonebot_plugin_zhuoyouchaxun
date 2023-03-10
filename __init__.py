@@ -766,12 +766,22 @@ notice_handle  = on_notice ( priority =5,  block =True )
 
 @notice_handle.handle () 
 async  def  GroupNewMember ( bot :  Bot ,  event :  GroupIncreaseNoticeEvent ): 
+
+    path_record = Path(__file__).parent /'resource'/ "入群语音.mp3"
+    record = MessageSegment.record(path_record)
     if  event . user_id  == event . self_id : 
         await  bot . send_group_msg ( group_id =event . group_id ,  message =Message ( 
             MessageSegment . text ( '小伙伴们好呀~我是梨花酱，是桌游图书馆的管理员哦~\n' ) ) )
     else:
         await bot.send_group_msg ( group_id =event . group_id ,  message =Message ( 
-            MessageSegment . at ( event . user_id )  + MessageSegment . text ( "欢迎新桌友哦~我是桌游图书馆管理员梨花酱，请注意查看群公告内容~梨花可以帮你查找图包，向几十个群发送您的约车信息~发送“梨花命令”四个字可以获得梨花的命令目录哦~\n" ))) 
+            MessageSegment . at ( event . user_id )  
+            + MessageSegment . text ( "欢迎新桌友哦~我是桌游图书馆管理员梨花酱，请注意查看群公告内容~梨花可以帮你查找图包，向几十个群发送您的约车信息~发送“梨花命令”四个字可以获得梨花的命令目录哦~\n" )
+            ))
+        groupid = event.group_id
+        if str(groupid) == "373939194":
+            await notice_handle.send(record)
+            #await bot.send_group_msg(group_id =groupid,message =Message (record))
+    
 
 
 
