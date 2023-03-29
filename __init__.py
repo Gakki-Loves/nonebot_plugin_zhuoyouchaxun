@@ -31,6 +31,7 @@ from pathlib import Path
 import asyncio
 import os
 import json
+from datetime import datetime
 from nonebot.typing import T_State
 from nonebot.log import logger
 from nonebot.exception import ActionFailed
@@ -437,9 +438,14 @@ async def _(bot: Bot,state:T_State,event: GroupMessageEvent,deadline: str = ArgP
         else:
             deadline+=str(min)
         if "24:00">=deadline>="00:00":# 虽然根据"^[0-23]{1,2}:[0-59]{1,2}$"这个正则表达式，只要能进到if(matchObj!=None):里的时间，都肯定符合"24:00">=deadline>="00:00"这个要求，但为了不删除Gakki的代码，还是把这句话保留下来了
-            car_id = str(state['userid'])
-            content = str(state['content'])
-            runcar(car_id,content,deadline)
+            now = datetime.now()
+            time_now = now.strftime('%H:%M')
+            if deadline >= time_now:
+                car_id = str(state['userid'])
+                content = str(state['content'])
+                runcar(car_id,content,deadline)
+            else:
+                await run_car.finish("笨蛋！发车时间怎么能比现在时间还早！请输入“桌游发车”重新操作哦~")
         else :
             await run_car.finish("敲你脑袋哦！时间填错啦！请输入“桌游发车”重新操作哦~")
     else:
@@ -1025,7 +1031,7 @@ auto_req = on_request()
 @auto_req.handle()
 async def _(bot:Bot,event : GroupRequestEvent):
     group_id = str(event.group_id)
-    if group_id == "373939194":
+    if group_id == "177053575":
         raw  = json . loads ( event . json ()) 
         gid  = str ( event . group_id ) 
         flag  = raw ['flag' ]
