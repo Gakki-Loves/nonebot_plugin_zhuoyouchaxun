@@ -1022,29 +1022,7 @@ async def _(bot:Bot,event : GroupRequestEvent):
                     approve =True , 
                     reason =' ' , )
                 await  bot . send_msg ( user_id =int ( "739150373"),  message =f"同意{uid }加入群 {gid },验证消息为 “{word }”") 
-"""# 读取关键词列表
-with open('data/LihuaBot/keywords.json', 'r', encoding='utf-8') as f:
-    KEYWORDS = json.load(f)['keywords']
-approve = on_request()
-@approve.handle()
-async def _(bot: Bot, event: Event):
 
-    # 判断是否是群请求事件
-    if isinstance(event, GroupRequestEvent):
-        # 判断是否为指定群号
-        if event.group_id == "373939194":
-            # 获取请求信息中的文字
-            text = event.message.strip()
-            # 判断文字中是否含有关键词
-            if any(keyword in text for keyword in KEYWORDS):
-                # 判断是否为同意入群
-                if event.sub_type == 'add':
-                    # 自动通过群请求
-                    await bot.set_group_add_request(flag=event.flag, sub_type=event.sub_type)
-                else:
-                    # 拒绝请求
-                    await bot.set_group_add_request(flag=event.flag, sub_type=event.sub_type, approve=False)
-"""
 
 # +------------------------娱乐区-------------------------+
 sponsor = on_fullmatch("赞助梨花",priority=99)
