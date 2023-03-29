@@ -350,10 +350,41 @@ def delete_car(carid,playerid):
         conn.close()
         return [False,"不可以封别人的车车哦！梨花不喜欢你了！"] 
 
+# -----查询图包数量
+def search_mod_count():
+    
+    # 连接数据库
+    conn = sqlite3.connect(
+       Path(os.path.join(os.path.dirname(__file__), "resource"))/"zhuoyou.db")
+    # 创建游标
+    #conn = sqlite3.connect(r'D:\Github\LihuaBot\nb2\LihuaBot\src\plugins\nonebot_plugin_zhuoyouchaxun\resource\zhuoyou.db')
+    cur = conn.cursor()
+    cur.execute(
+        f"SELECT COUNT(*) FROM tubao"
+    ) 
+    # 得到查询结果
+    db_data = cur.fetchall()
+    conn.close()
+    # 返回图包数量
+    return db_data
 
-
-
-
+# -----查询玩家数量
+def search_player_count():
+    
+    # 连接数据库
+    conn = sqlite3.connect(
+       Path(os.path.join(os.path.dirname(__file__), "resource"))/"zhuoyou.db")
+    # 创建游标
+    #conn = sqlite3.connect(r'D:\Github\LihuaBot\nb2\LihuaBot\src\plugins\nonebot_plugin_zhuoyouchaxun\resource\zhuoyou.db')
+    cur = conn.cursor()
+    cur.execute(
+        f"SELECT COUNT(*) FROM player"
+    ) 
+    # 得到查询结果
+    db_data = cur.fetchall()
+    conn.close()
+    # 返回图包数量
+    return db_data
 
 
 

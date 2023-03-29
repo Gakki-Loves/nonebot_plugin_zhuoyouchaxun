@@ -38,9 +38,9 @@ from nonebot.permission import SUPERUSER
 from .permission_manager import PermissionManager
 
 from  nonebot . params  import  Arg ,  CommandArg ,  ArgPlainText 
-from .get_data import get_idname,get_BGinfo,get_tubaoname,get_tubaoinfo,runcar,searchcar,uploadmod,add_garage,delete_car,delete_mod,ifcarexist
+from .get_data import get_idname,get_BGinfo,get_tubaoname,get_tubaoinfo,runcar,searchcar,uploadmod,add_garage,delete_car,delete_mod,ifcarexist,search_mod_count,search_player_count
 from .player_info import player_init,player_exist,player_rename,player_search_info,player_search_nickname
-
+# from .reply import talk
 
 
 import time # 快乐小隆要用做时间转换
@@ -669,7 +669,20 @@ async def _(state:T_State,mod_id: str = ArgPlainText("mod_id"),prompt="图包ID"
 
 
 
+# ----------------------查询图包数量------------------------------
+searchmodcount = on_command("查询图包数量",priority=99,permission=SUPERUSER)
+@searchmodcount.handle()
+async def _(bot: Bot, event: MessageEvent,state:T_State):
+    data = search_mod_count()
+    await searchmodcount.send(f"梨花查询了一下，目前图包库有 {data[0][0]} 个图包呦~")
 
+
+# ----------------------查询玩家数量------------------------------
+searchplayercount = on_command("查询玩家数量",priority=99,permission=SUPERUSER)
+@searchplayercount.handle()
+async def _(bot: Bot, event: MessageEvent,state:T_State):
+    data = search_player_count()
+    await searchplayercount.send(f"梨花查询了一下，目前已有{data[0][0]}名玩家登记在册呦~")
 
 
 
@@ -723,9 +736,9 @@ async def _():
 
     其他功能：
     ‘XX天气’        查询XX未来几天的天气
-    ‘占卜/塔罗牌’   占卜功能
-    ‘人生重开’      人生重开模拟器
-    ‘疯狂星期四’    随机发送疯狂星期四文案
+    ‘占卜/塔罗牌’   占卜功能（暂时停用）
+    ‘人生重开’      人生重开模拟器（暂时停用）
+    ‘疯狂星期四’    随机发送疯狂星期四文案（暂时停用）
     ‘.send +内容’   可以直接和bot作者对话，提出意见建议
     ‘赞助梨花’       给梨花买一杯奶茶叭！
 
@@ -1016,7 +1029,7 @@ async def _(bot:Bot,event : GroupRequestEvent):
             word  = re . findall ( re . compile ( '答案：(.*)'),  comment ) 
             text = comment.strip()
             if any(keyword in text for keyword in KEYWORDS):
-                logger . info ( f"同意{uid }加入群 {gid },验证消息为 “{word }”") 
+                logger . info ( f"同意{uid }加入群 {gid },验证消息为 “{text}”") 
                 await bot.set_group_add_request(flag =flag , 
                     sub_type =sub_type , 
                     approve =True , 
@@ -1143,9 +1156,9 @@ async def _(bot: Bot, event: MessageEvent,state:T_State):
 
     其他功能：
     ‘XX天气’        查询XX未来几天的天气
-    ‘占卜/塔罗牌’   占卜功能
-    ‘人生重开’      人生重开模拟器
-    ‘疯狂星期四’    随机发送疯狂星期四文案
+    ‘占卜/塔罗牌’   占卜功能（暂时停用）
+    ‘人生重开’      人生重开模拟器（暂时停用）
+    ‘疯狂星期四’    随机发送疯狂星期四文案（暂时停用）
     ‘.send +内容’   可以直接和bot作者对话，提出意见建议
 
     白名单管理：
