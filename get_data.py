@@ -386,7 +386,21 @@ def search_player_count():
     # 返回图包数量
     return db_data
 
+# -----查询图包上传者
+def search_mod_uploader(mod_id):
 
+    # 连接数据库
+    conn = sqlite3.connect(
+       Path(os.path.join(os.path.dirname(__file__), "resource"))/"zhuoyou.db")
+    # 创建游标
+    #conn = sqlite3.connect(r'D:\Github\LihuaBot\nb2\LihuaBot\src\plugins\nonebot_plugin_zhuoyouchaxun\resource\zhuoyou.db')
+    cur = conn.cursor()
+    cur.execute(
+        f"SELECT * from tubao WHERE tubao_id like '{mod_id}'"
+    ) 
+    # 得到查询结果
+    db_data = cur.fetchall()
+    return db_data
 
 # ---总车库记录信息
 def add_garage(player_id,content,group_id,real_time):

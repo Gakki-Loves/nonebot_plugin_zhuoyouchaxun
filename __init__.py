@@ -38,7 +38,7 @@ from nonebot.permission import SUPERUSER
 from .permission_manager import PermissionManager
 
 from  nonebot . params  import  Arg ,  CommandArg ,  ArgPlainText 
-from .get_data import get_idname,get_BGinfo,get_tubaoname,get_tubaoinfo,runcar,searchcar,uploadmod,add_garage,delete_car,delete_mod,ifcarexist,search_mod_count,search_player_count
+from .get_data import get_idname,get_BGinfo,get_tubaoname,get_tubaoinfo,runcar,searchcar,uploadmod,add_garage,delete_car,delete_mod,ifcarexist,search_mod_count,search_player_count,search_mod_uploader
 from .player_info import player_init,player_exist,player_rename,player_search_info,player_search_nickname
 # from .reply import talk
 
@@ -684,9 +684,17 @@ async def _(bot: Bot, event: MessageEvent,state:T_State):
     data = search_player_count()
     await searchplayercount.send(f"梨花查询了一下，目前已有{data[0][0]}名玩家登记在册呦~")
 
+# ----------------------查询图包上传者------------------------------
+searchmoduploader = on_command("查询图包上传者",priority=99,permission=SUPERUSER)
+@searchmoduploader.handle()
+async def _(bot: Bot, event: MessageEvent,state:T_State):
+    await deletemod.send("请输入需要查询的图包ID")
 
-
-
+@searchmoduploader.got("moduploadid")
+async def _(state:T_State,moduploadid: str = ArgPlainText("moduploadid"),prompt="图包ID"):
+    moduploadid = int(moduploadid)
+    uploader = search_mod_uploader(moduploadid)
+    await deletemod.finish(f"梨花查询了图包库，图包上传者是 {uploader[0][4]} 哦~")
 
 
 
@@ -1181,6 +1189,10 @@ async def _(bot: Bot, event: MessageEvent,state:T_State):
     ‘图包删除’      删除某个图包
     ‘查看群列表’    查看梨花加入的群
     ‘梨花权限命令’    管理插件权限
+    ‘查询图包数量’    查询梨花图书馆收录了多少个图包
+    ‘查询玩家数量’    查询梨花图书馆有多少小伙伴登记在册
+    ‘查询图包上传者’   查询某图包是谁上传的
+    
     """
     title = '梨花超级用户命令:'
     text = help_msg
