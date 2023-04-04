@@ -2,19 +2,12 @@
 Author: Gakkilove 739150373@qq.com
 Date: 2023-02-11 22:20:48
 LastEditors: Gakkilove 739150373@qq.com
-LastEditTime: 2023-04-04 09:28:22
+LastEditTime: 2023-04-04 09:31:12
 FilePath: \nonebot_plugin_zhuoyouchaxun\__init__.py
 Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
 '''
 
-#'''
-#Author: Gakkilove 739150373@qq.com
-#Date: 2023-01-14 11:02:34
-#LastEditors: Gakkilove 739150373@qq.com
-#LastEditTime: 2023-01-14 11:09:51
-#FilePath: \nonebot_plugin_zhuoyouchaxun\get_data.py
-#Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
-#'''
+
 
 from nonebot import require
 require("nonebot_plugin_apscheduler")
