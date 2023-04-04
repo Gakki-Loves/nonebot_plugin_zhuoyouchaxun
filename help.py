@@ -2,7 +2,7 @@
 Author: Gakkilove 739150373@qq.com
 Date: 2023-04-03 22:07:06
 LastEditors: Gakkilove 739150373@qq.com
-LastEditTime: 2023-04-04 09:07:52
+LastEditTime: 2023-04-04 12:00:01
 FilePath: \nonebot_plugin_zhuoyouchaxun\help.py
 Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
 '''
@@ -48,6 +48,7 @@ async def _():
     ‘桌游封车’/‘封车’    只可以封自己发的车车哦
     ‘上传图包’           把你的图包链接上传至数据库
     (发送”桌游发车“梨花可以把你的约车信息广播到几十个群哦)
+    ‘随机桌游’           不知道玩什么？随机一个桌游来玩叭！
 
     个人信息功能：
     （仍在开发，涉及到后续的金币系统和梨花好感度系统）
@@ -111,6 +112,7 @@ async def _(bot: Bot, event: MessageEvent,state:T_State):
     ‘桌游封车’/‘封车’    只可以封自己发的车车哦
     ‘上传图包’           把你的图包链接上传至数据库
     (发送”桌游发车“梨花可以把你的约车信息广播到几十个群哦)
+    ‘随机桌游’           不知道玩什么？随机一个桌游来玩叭！
 
     个人信息功能
     （仍在开发，涉及到后续的金币系统和梨花好感度系统）

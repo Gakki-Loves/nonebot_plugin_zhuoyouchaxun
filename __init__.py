@@ -2,7 +2,7 @@
 Author: Gakkilove 739150373@qq.com
 Date: 2023-02-11 22:20:48
 LastEditors: Gakkilove 739150373@qq.com
-LastEditTime: 2023-04-04 09:31:12
+LastEditTime: 2023-04-04 11:52:26
 FilePath: \nonebot_plugin_zhuoyouchaxun\__init__.py
 Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
 '''
@@ -40,7 +40,7 @@ from nonebot.permission import SUPERUSER
 from .permission_manager import PermissionManager
 
 from  nonebot . params  import  Arg ,  CommandArg ,  ArgPlainText 
-from .get_data import get_idname,get_BGinfo,get_tubaoname,get_tubaoinfo,runcar,searchcar,uploadmod,add_garage,delete_car,delete_mod,ifcarexist,search_mod_count,search_player_count,search_mod_uploader
+from .get_data import *
 from .player_info import player_init,player_exist,player_rename,player_search_info,player_search_nickname
 from .reply import talk
 # from .friendship import sign
@@ -704,6 +704,26 @@ async def _(state:T_State,moduploadid: str = ArgPlainText("moduploadid"),prompt=
     uploader = search_mod_uploader(moduploadid)
     await deletemod.finish(f"梨花查询了图包库，图包上传者是 {uploader[0][4]} 哦~")
 
+# ----------------------随机桌游------------------------------+
+# 随机发送一个图包
+randam_boardgame = on_command("随机桌游",priority=50)
+@randam_boardgame.handle()
+async def _(bot: Bot, event: MessageEvent,state:T_State):
+    message_list = []
+    radam_data = randamboardgame()
+
+    # 尝试发送
+    try:
+        for msg in radam_data:
+            await randam_boardgame.send(msg)
+            await asyncio.sleep(0.5)
+    #若发送失败
+    except ActionFailed as F:
+        logger.warning(F)
+        await randam_boardgame.finish(
+            message=Message(f"不听不听，哄我两句再试试！"),
+            at_sender=True
+        )
 
 
 
