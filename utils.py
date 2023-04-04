@@ -9,7 +9,7 @@ try:
 except ModuleNotFoundError:
     import json
 
-path = os.path.join(os.path.dirname(__file__), ("resource"/"group_words"))
+path = os.path.join(os.path.dirname(__file__), "resource/group_words")
 
 # 载入个人词库
 lst = os.listdir(Path(path))

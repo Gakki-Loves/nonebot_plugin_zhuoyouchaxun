@@ -1,3 +1,11 @@
+'''
+Author: Gakkilove 739150373@qq.com
+Date: 2023-02-11 22:20:48
+LastEditors: Gakkilove 739150373@qq.com
+LastEditTime: 2023-04-04 09:28:22
+FilePath: \nonebot_plugin_zhuoyouchaxun\__init__.py
+Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
+'''
 
 #'''
 #Author: Gakkilove 739150373@qq.com
@@ -41,8 +49,9 @@ from .permission_manager import PermissionManager
 from  nonebot . params  import  Arg ,  CommandArg ,  ArgPlainText 
 from .get_data import get_idname,get_BGinfo,get_tubaoname,get_tubaoinfo,runcar,searchcar,uploadmod,add_garage,delete_car,delete_mod,ifcarexist,search_mod_count,search_player_count,search_mod_uploader
 from .player_info import player_init,player_exist,player_rename,player_search_info,player_search_nickname
-# from .reply import talk
-
+from .reply import talk
+# from .friendship import sign
+from .help import *
 
 import time # 快乐小隆要用做时间转换
 import re # 快乐小隆要用做时间转换
@@ -743,8 +752,6 @@ async  def  GroupNewMember ( bot :  Bot ,  event :  GroupIncreaseNoticeEvent ):
             MessageSegment . at ( event . user_id )  
             + MessageSegment . text ( "欢迎新桌友哦~我是桌游图书馆管理员梨花酱，请注意查看群公告内容~梨花可以帮你查找图包，向几十个群发送您的约车信息~发送“梨花命令”四个字可以获得梨花的命令目录哦~\n" )
             ))
-        groupid = event.group_id
-        if str(groupid) == "373939194":
         await notice_handle.send(record)
             #await bot.send_group_msg(group_id =groupid,message =Message (record))
     
@@ -1000,8 +1007,8 @@ async def _(bot: Bot, event: MessageEvent):
     # 发送图片
     await sponsor.finish(image)
 
-    
-hitme = on_command("梨花揍我",block=True,priority=90)
+  
+"""hitme = on_command("梨花揍我",block=True,priority=90)
 @hitme.handle()
 async def _(bot: Bot, event: Event):
     if event.get_user_id() == "739150373":
@@ -1023,7 +1030,7 @@ async def _(bot: Bot, event: Event):
     if event.get_user_id() == "739150373":
         await kiss.finish(Message(f'[CQ:at,qq={event.get_user_id()}]不可以呦！去亲嫂子去！'))
     else:
-        await kiss.finish(Message(f'[CQ:at,qq={event.get_user_id()}]给梨花爬！'))
+        await kiss.finish(Message(f'[CQ:at,qq={event.get_user_id()}]给梨花爬！'))"""
 
 
 
