@@ -2,7 +2,7 @@
 Author: Gakkilove 739150373@qq.com
 Date: 2023-02-11 22:20:48
 LastEditors: Gakkilove 739150373@qq.com
-LastEditTime: 2023-04-05 22:44:48
+LastEditTime: 2023-04-06 10:48:39
 FilePath: \nonebot_plugin_zhuoyouchaxun\__init__.py
 Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
 '''
@@ -517,6 +517,13 @@ reserve_car = on_command("预约发车",priority=10)
 @reserve_car.handle()
 async def _(bot: Bot, event: MessageEvent,state:T_State):
 
+    # 判断是否为主群，不是主群不开这个功能
+    group_id = str(event.group_id)
+    # if group_id == "177053575" :
+    if group_id == "373939194":
+        pass
+    else:
+        await reserve_car.finish("预约发车目前为测试功能，只有在梨花的图书馆（群号：177053575）才可以使用哦！")
 
     # 进行梨花身份信息的创建
     playerid = event.get_user_id()
@@ -527,10 +534,75 @@ async def _(bot: Bot, event: MessageEvent,state:T_State):
         playername = json.loads(json.dumps(await bot.get_stranger_info(user_id =int(playerid))))['nickname']
         player_init(playerid,playername)
 
-    # 判定一下司机是否已经有一辆车在开了
-    data = ifcarexist(playerid)
-    if data == False:
-         await run_car.finish("一个人不可以同时开两辆车车哦！请封车后再开！")
+    # 获取预约发车信息
+    playername = player_search_nickname(playerid)
+    state['userid'] = str(event.user_id)
+    state['playername'] = str(playername[0][0])
+    await reserve_car.send("这是一辆未来之车，请输入发车信息：\n《桌游名》（是否带扩）\n【人数&教学】X=X/带教学\n【类型】美式/战斗\n【时长】教15分钟；玩60分钟\n【难度】2/5\n【联系方式】QQ/微信/其他\n")
+
+@reserve_car.got("content")
+async def _(state:T_State,content: str = ArgPlainText("content"),prompt="模板"):
+    # 获取刚刚获得的user_id，这样就能跨函数使用
+    #car_id = str(state['userid'])
+    state['content'] = content
+    await reserve_car.send("请输入未来的发车时间，时间格式为：\n月(01-12)-日(01-31) 小时(00-24):分钟(00-60),例如:\n05-01 08:00\nPS：请务必使用上述格式，否则系统无法识别")
+
+@reserve_car.got("deadline")
+async def _(bot: Bot,state:T_State,event: GroupMessageEvent,deadline: str = ArgPlainText("deadline")):
+    # 获取刚刚获得的user_id，这样就能跨函数使用
+    #car_id = str(state['userid'])
+    state['deadline'] = deadline
+    deadline = deadline.replace("：", ":")
+    matchObj = re.match(r"^([0-9][0-9]-[0-9][0-9]\s[0-9][0-9]\S[0-9][0-9])", deadline, re.I)#正则表达式，来检验AA:BB这样的时间，其中AA的范围是0-23和00-23，BB的范围是00-59和0-59
+    if(matchObj!=None):# 如果上面这个re.match函数匹配到东西了，也就是matchObj的结果不为None那说明用户输入的时间是正确的
+        timeArray = time.strptime(deadline, "%m-%d %H:%M") # 把用户输入的时间拆分为小时和分钟，以便于后续把9:31这样的“少0”的时间变成正常的XX:XX格式的时间
+        hour=timeArray[3] # 小时
+        min=timeArray[4] # 分钟
+        month = timeArray[1] # 月份
+        day = timeArray[2] # 日期
+        if(month>=0 and hour<=9): #
+            deadline='0'+str(month)+"-" 
+        else:
+            deadline=str(month)+"-"
+        if(day>=0 and day<=9): #
+            deadline+='0'+str(day)+" " 
+        else:
+            deadline+=str(day)+" "
+        if(hour>=0 and hour<=9): #
+            deadline+='0'+str(hour)+":" # 把0-9点前面加0，这步结束deadline的值应该是变成00，01，02，···，09
+        else:
+            deadline+=str(hour)+":"# 如果小时是11-23那就不管，这步结束deadline的值应该是变成10，11，12，···，23
+        if(min>=0 and min<=9): 
+            deadline=deadline+'0'+str(min) # 把0-9分前面加0
+        else:
+            deadline+=str(min)
+        
+        now = datetime.now()
+        time_now = now.strftime('%m-%d %H:%M')
+        if deadline >= time_now:
+            car_id = str(state['userid'])
+            content = str(state['content'])
+            reservecar(car_id,content,deadline)
+        else:
+            await run_car.finish("笨蛋！发车时间怎么能比现在时间还早！请输入“桌游发车”重新操作哦~")
+        
+    else:
+        await run_car.finish("敲你脑袋哦！时间填错啦！请输入“桌游发车”重新操作哦~")
+
+
+    # ---写进garage库部分
+    now= str(time.strftime('%Y-%m-%d %a %H:%M:%S'))
+    # 获取字典内容，不要问我为什么不用上面的变量因为我懒
+    player_id = str(state['userid'])
+    content = str(state['content'])
+    group_id = str(event.group_id)
+    add_garage(player_id,content,group_id,now)
+    # ---写进garage库部分
+
+
+    await reserve_car.finish("梨花已经帮你记录到车库啦！可以输入“查车”命令来查询呦")
+
+
 
 
 # -----------------------查车-----------------------
@@ -558,8 +630,11 @@ async def _(bot: Bot, event: MessageEvent,state:T_State):
         
     # 用state字典把这里获取的user_id保存
     message_searchcar = searchcar()
-    # 消息发送列表
+    
+    
+    # -----消息发送列表
     message_list = []
+    # 先把常规车库加入
     for car_list in message_searchcar:
         # 如果idname0的状态为True，说明有这个信息
         if car_list[0]:               
@@ -571,6 +646,7 @@ async def _(bot: Bot, event: MessageEvent,state:T_State):
         else:
             message = car_list[1]+car_list[2]
             message_list.append(message)
+    
 
     # 尝试发送
     try:
@@ -610,7 +686,87 @@ async def _(bot: Bot, event: MessageEvent,state:T_State):
 
 
 # -----------------------------------------------------
+# -----------------------查预约车-----------------------
+search_car = on_command("查预约车",block=True,priority=11,aliases={"查未来车"})
+@search_car.handle()
+async def _(bot: Bot, event: MessageEvent,state:T_State):
 
+    # 功能开启判定
+    if isinstance(event, PrivateMessageEvent):
+        state['sid'] = 'user_' + str(event.user_id)
+    if isinstance(event, GroupMessageEvent):
+        state['sid'] = 'group_' + str(event.group_id)
+    cmd_search_boardgame = pm.Query_search_car(state['sid'])
+    if cmd_search_boardgame == False:
+        await chaxun.finish("桌游查车功能没有开启哦~")
+
+    # 进行梨花身份信息的创建
+    playerid = event.get_user_id()
+    info = player_exist(playerid)
+    if info:
+        pass
+    else:
+        playername = json.loads(json.dumps(await bot.get_stranger_info(user_id =int(playerid))))['nickname']
+        player_init(playerid,playername)
+        
+    # 用state字典把这里获取的user_id保存
+    message_searchreservecar = search_reservecar()
+    
+    
+    # -----消息发送列表
+    message_list = []
+    # 先把常规车库加入
+    for car_list in message_searchreservecar:
+        # 如果idname0的状态为True，说明有这个信息
+        if car_list[0]:               
+            message = f"下面是存在的未来之车~"
+            message_list.append(message)
+            for onecar in car_list[1]:
+                message_list.append(onecar)
+        # 如果为false，说明没有这个信息
+        else:
+            message = car_list[1]+car_list[2]
+            message_list.append(message)
+    
+
+    # 尝试发送
+    try:
+        if isinstance(event, PrivateMessageEvent):
+            msg = []
+            for msg in message_list:
+                #await chaxun.send(msg)
+                await search_car.send(msg)
+                await asyncio.sleep(0.5)
+        elif isinstance(event, GroupMessageEvent):
+            #title = ' '
+            #text = message_list
+            #font_size = 20
+            #txt2img = Txt2Img()
+            #txt2img.set_font_size(font_size)
+            #pic = txt2img.draw(title, text)
+            #msg = MessageSegment.image(pic)
+
+            msgs = []
+            for msg in message_list:
+                msgs.append({
+                    'type': 'node',
+                    'data': {
+                        'name': "梨花酱",
+                        'uin': bot.self_id,
+                        'content': msg
+                    }
+                })
+            await bot.call_api('send_group_forward_msg', group_id=event.group_id, messages=msgs)
+        #若发送失败
+    except ActionFailed as F:
+        logger.warning(F)
+        await search_car.finish(
+            message=Message(f"不听不听，哄我两句再试试！"),
+            at_sender=True
+        )
+
+
+# -----
 
 # ----------------------封车------------------------------
 deletecar = on_command("桌游封车",priority=11,aliases={"封车"})
