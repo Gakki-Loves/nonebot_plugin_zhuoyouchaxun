@@ -2,7 +2,7 @@
 Author: Gakkilove 739150373@qq.com
 Date: 2023-04-03 22:07:06
 LastEditors: Gakkilove 739150373@qq.com
-LastEditTime: 2023-04-04 12:00:01
+LastEditTime: 2023-04-06 11:16:27
 FilePath: \nonebot_plugin_zhuoyouchaxun\help.py
 Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
 '''
@@ -38,7 +38,7 @@ def msg_word2pic(wordtitle,wordmsg):
 lihuahelp = on_command("梨花命令",block=True, priority=10,aliases={"梨花指令","梨花帮助文档","梨花酱 指令","梨花酱指令","梨花帮助","梨花文档","梨花help"})
 @lihuahelp.handle()
 async def _():
-    help_title = """梨花的使用命令:"""
+    help_title = """梨花的使用命令(请私聊梨花)"""
     help_msg = """
     桌游功能：          
     ‘桌游查询 XXX’       查询XXX桌游信息
@@ -49,6 +49,8 @@ async def _():
     ‘上传图包’           把你的图包链接上传至数据库
     (发送”桌游发车“梨花可以把你的约车信息广播到几十个群哦)
     ‘随机桌游’           不知道玩什么？随机一个桌游来玩叭！
+    ‘预约发车’（暂时关闭） 可以和小伙伴预约玩耍啦！
+    ‘查预约车’（暂时关闭） 可以查询未来几天有什么车车！
 
     个人信息功能：
     （仍在开发，涉及到后续的金币系统和梨花好感度系统）
@@ -113,6 +115,8 @@ async def _(bot: Bot, event: MessageEvent,state:T_State):
     ‘上传图包’           把你的图包链接上传至数据库
     (发送”桌游发车“梨花可以把你的约车信息广播到几十个群哦)
     ‘随机桌游’           不知道玩什么？随机一个桌游来玩叭！
+    ‘预约发车’           可以和小伙伴预约玩耍啦！
+    ‘查预约车’           可以查询未来几天有什么车车！
 
     个人信息功能
     （仍在开发，涉及到后续的金币系统和梨花好感度系统）

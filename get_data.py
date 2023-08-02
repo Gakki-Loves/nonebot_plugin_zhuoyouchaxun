@@ -19,6 +19,7 @@ from pathlib import Path
 error = "出错啦！"
 from datetime import datetime
 from nonebot import utils
+from .player_info import player_search_info
 import re
 
 
@@ -302,20 +303,31 @@ def searchcar():
             return data
         else:
             data.append(True)
+            
             for i in range(len(db_data)):
                 time_str = db_data[i][3]
                 time_str = time_str.replace("：", ":")
                 #time_format = datetime.strptime(time_str, '%H:%M')
                 now = datetime.now()
                 time_now = now.strftime('%H:%M')
-
+				
+                # 20230725更新，在查车时直接查询发车人昵称
+    			# 使用车车信息里的qq号进行查询
+                # ====增加位置
+                qqname = db_data[i][1]
+                user_data = player_search_info(qqname)
+                nkname=str(user_data[0][1])
+				#nkname = str(user_data[0][1])
+                # ====增加位置结束
                 if time_str >= time_now:
                     msg = (
-                    "--------------------\n车车ID："
+                    "--------------------\n【车车ID】"
                     + str(db_data[i][0])
-                    + "\n"
+                    + "\n【发车人】"
+                    + nkname
+                    +"\n"                    
                     + db_data[i][2]
-                    + "\n截止时间："
+                    + "\n【截止时间】"
                     + db_data[i][3]
                     + "\n--------------------"
                         )
@@ -432,7 +444,7 @@ def delete_car(carid,playerid):
         conn.close()
         return [False,"现在车库里没有车车可以封噢"]
     cursor = cur.execute(
-        f"SELECT car_id,player_id from cheche WHERE (car_id ='{carid}'AND player_id = '{playerid}')"
+        f"SELECT car_id from cheche WHERE car_id ='{carid}'"
     ) 
     db_data = cur.fetchall()
     if db_data:
@@ -441,10 +453,40 @@ def delete_car(carid,playerid):
         )
         conn.commit()
         conn.close()
-        return [True,"梨花已经把你发的车封了哦~"] 
+        return [True,"哥哥，强制封车成功啦！"] 
     else: 
         conn.close()
-        return [False,"不可以封别人的车车哦！梨花不喜欢你了！"] 
+        return [False,"车库里没有这辆车噢！"] 
+
+
+# -----封车2
+def delete_car2(playerid):
+    conn = sqlite3.connect(
+       Path(os.path.join(os.path.dirname(__file__), "resource"))/"zhuoyou.db")
+    # 创建游标
+    #conn = sqlite3.connect(r'D:\Github\LihuaBot\nb2\LihuaBot\src\plugins\nonebot_plugin_zhuoyouchaxun\resource\zhuoyou.db')
+    cur = conn.cursor()
+    cursor = cur.execute(
+        f"SELECT * from cheche "
+    ) 
+    db_data = cur.fetchall()
+    if db_data == []:
+        conn.close()
+        return [False,"现在车库里没有车车可以封噢"]
+    cursor = cur.execute(
+        f"SELECT player_id from cheche WHERE player_id = '{playerid}'"
+    ) 
+    db_data = cur.fetchall()
+    if db_data:
+        cur.execute(
+            f"DELETE FROM cheche WHERE player_id = '{playerid}'"
+        )
+        conn.commit()
+        conn.close()
+        return [True,"梨花已经把你发的车封了哦~（封车功能优化，不需要输入车车ID就可以封自己的车啦！）"] 
+    else: 
+        conn.close()
+        return [False,"你目前还没有车车噢！"] 
 
 # -----查询图包数量
 def search_mod_count():

@@ -114,7 +114,7 @@ def msg_word2pic(wordtitle,wordmsg):
 chaxun = on_regex(
     chaxun_regex,
     priority=20,
-    block=True
+    block=True,
 )
 
 #响应器处理
@@ -313,6 +313,10 @@ async def _(bot: Bot, event: MessageEvent,state: T_State):
                     tubao_msg_id.append((await tubao.send(msg))['message_id'])
                     await asyncio.sleep(0.5)
             elif isinstance(event, GroupMessageEvent):
+                '''for msg in message_list:
+                    await tubao.send(msg)
+                    await asyncio.sleep(0.5)
+                # 这里是群聊转发的方式，现在已经不能用了，仅仅是保留代码'''
                 msgs = []
                 for msg in message_list:
                     msgs.append({
@@ -324,6 +328,7 @@ async def _(bot: Bot, event: MessageEvent,state: T_State):
                     }
                     })
                 await bot.call_api('send_group_forward_msg', group_id=event.group_id, messages=msgs)
+                
         elif state['iftubao'] == False:
             for msg in message_list:
                     #await chaxun.send(msg)
@@ -358,6 +363,10 @@ async def _(bot:Bot,event:MessageEvent,state: T_State,tubao_id: str = ArgPlainTe
                 await tubao.send(msg)
                 await asyncio.sleep(0.5)
         elif isinstance(event, GroupMessageEvent):
+            '''for msg in message_list:
+                #await chaxun.send(msg)
+                await tubao.send(msg)
+                await asyncio.sleep(0.5)'''
             msgs = []
             for msg in message_list:
                 msgs.append({
@@ -369,6 +378,7 @@ async def _(bot:Bot,event:MessageEvent,state: T_State,tubao_id: str = ArgPlainTe
                     }
                 })
             await bot.call_api('send_group_forward_msg', group_id=event.group_id, messages=msgs)
+            
     else:
         await tubao.finish()
 
@@ -421,7 +431,7 @@ async def _(state:T_State,content: str = ArgPlainText("content"),prompt="模板"
 
 
 @run_car.got("deadline")
-async def _(bot: Bot,state:T_State,event: GroupMessageEvent,deadline: str = ArgPlainText("deadline")):
+async def _(bot: Bot,state:T_State,event: MessageEvent,deadline: str = ArgPlainText("deadline")):
     # 获取刚刚获得的user_id，这样就能跨函数使用
     #car_id = str(state['userid'])
     state['deadline'] = deadline
@@ -452,7 +462,8 @@ async def _(bot: Bot,state:T_State,event: GroupMessageEvent,deadline: str = ArgP
             await run_car.finish("敲你脑袋哦！时间填错啦！请输入“桌游发车”重新操作哦~")
     else:
         await run_car.finish("敲你脑袋哦！时间填错啦！请输入“桌游发车”重新操作哦~")
-    # ------多群广播发车信息功能
+    #await run_car.finish("发车成功！（现阶段私聊发车没办法全群广播噢！只能输入“查车”来看现在有什么车）")
+    # ------多群广播发车信息功能（暂时关闭）
     cmd_broad_cast = pm.Query_broadcast_runcar()
     #cmd_broadcast = pm.Query_broadcastruncar(state['sid'])
     group_list = await bot.get_group_list()
@@ -500,7 +511,7 @@ async def _(bot: Bot,state:T_State,event: GroupMessageEvent,deadline: str = ArgP
         await run_car.finish("梨花已经帮你记录到车库啦！\n(第二轮测试期间，发车信息被多群广播只有在梨花的图书馆（群号：177053575）才可以使用哦！)")
 
 # -写进garage库部分,前面finish了把内容前移吧，就不再用一个matcher了
-"""@run_car.handle()
+'''@run_car.handle()
 async def _(bot: Bot, event: GroupMessageEvent,state:T_State):
     # 获取现在的时间
     now= str(time.strftime('%Y-%m-%d %a %H:%M:%S'))
@@ -509,18 +520,18 @@ async def _(bot: Bot, event: GroupMessageEvent,state:T_State):
     content = str(state['content'])
     group_id = str(event.group_id)
     add_garage(player_id,content,group_id,now)
-    await run_car.finish()"""
+    await run_car.finish()'''
 
 # ----------------------预约发车------------------------------
-reserve_car = on_command("预约发车",priority=10)
+reserve_car = on_command("预约发车",priority=10,permission=SUPERUSER)
 
 @reserve_car.handle()
 async def _(bot: Bot, event: MessageEvent,state:T_State):
 
     # 判断是否为主群，不是主群不开这个功能
     group_id = str(event.group_id)
-    # if group_id == "177053575" :
-    if group_id == "373939194":
+    if group_id == "177053575" :
+    # if group_id == "373939194":
         pass
     else:
         await reserve_car.finish("预约发车目前为测试功能，只有在梨花的图书馆（群号：177053575）才可以使用哦！")
@@ -600,7 +611,7 @@ async def _(bot: Bot,state:T_State,event: GroupMessageEvent,deadline: str = ArgP
     # ---写进garage库部分
 
 
-    await reserve_car.finish("梨花已经帮你记录到车库啦！可以输入“查车”命令来查询呦")
+    await reserve_car.finish("梨花已经帮你记录到车库啦！可以输入“查预约车”命令来查询呦")
 
 
 
@@ -649,6 +660,8 @@ async def _(bot: Bot, event: MessageEvent,state:T_State):
     
 
     # 尝试发送
+    # 20230725更新，在查车时直接查询发车人昵称
+    # 使用车车信息里的qq号进行查询
     try:
         if isinstance(event, PrivateMessageEvent):
             msg = []
@@ -657,6 +670,11 @@ async def _(bot: Bot, event: MessageEvent,state:T_State):
                 await search_car.send(msg)
                 await asyncio.sleep(0.5)
         elif isinstance(event, GroupMessageEvent):
+            '''msg = []
+            for msg in message_list:
+                #await chaxun.send(msg)
+                await search_car.send(msg)
+                await asyncio.sleep(0.5)'''
             #title = ' '
             #text = message_list
             #font_size = 20
@@ -676,6 +694,7 @@ async def _(bot: Bot, event: MessageEvent,state:T_State):
                     }
                 })
             await bot.call_api('send_group_forward_msg', group_id=event.group_id, messages=msgs)
+          
         #若发送失败
     except ActionFailed as F:
         logger.warning(F)
@@ -687,7 +706,7 @@ async def _(bot: Bot, event: MessageEvent,state:T_State):
 
 # -----------------------------------------------------
 # -----------------------查预约车-----------------------
-search_car = on_command("查预约车",block=True,priority=11,aliases={"查未来车"})
+search_car = on_command("查预约车",permission=SUPERUSER,block=True,priority=11,aliases={"查未来车"})
 @search_car.handle()
 async def _(bot: Bot, event: MessageEvent,state:T_State):
 
@@ -769,9 +788,9 @@ async def _(bot: Bot, event: MessageEvent,state:T_State):
 # -----
 
 # ----------------------封车------------------------------
-deletecar = on_command("桌游封车",priority=11,aliases={"封车"})
+deletecar = on_command("强制封车",permission=SUPERUSER,priority=11)
 @deletecar.handle()
-async def _(bot: Bot, event: GroupMessageEvent,state:T_State):
+async def _(bot: Bot, event: PrivateMessageEvent,state:T_State):
     state['player_id'] = event.get_user_id()
     await deletecar.send("请输入需要封车的车车ID")
 
@@ -788,6 +807,16 @@ async def _(state:T_State,car_id: str = ArgPlainText("car_id"),prompt="模板"):
         await deletecar.finish(msg_list[1])
 
 
+# ----------------------封车（不需要输入id版）------------------------------
+deletecar2 = on_command("桌游封车",priority=11,aliases={"封车"})
+@deletecar2.handle()
+async def _(bot: Bot, event: MessageEvent,state:T_State):
+    player_id = event.get_user_id() #根据车车的qq号封
+    msg_list = delete_car2(player_id)
+    if msg_list[0]:
+        await deletecar2.finish(msg_list[1])
+    else:
+        await deletecar2.finish(msg_list[1])
 
 
 
@@ -830,7 +859,7 @@ async def _(state:T_State,mod_name: str = ArgPlainText("mod_name"),prompt="模�
 
 
 @upload_mod.got("link")
-async def _(bot: Bot,state:T_State,event: GroupMessageEvent,link: str = ArgPlainText("link")):
+async def _(bot: Bot,state:T_State,event: MessageEvent,link: str = ArgPlainText("link")):
     #获取刚刚获得的上传人id和图包名字
     mod_name = str(state['mod_name'])
     upload_id = str(state['upload_id'])
@@ -887,7 +916,7 @@ async def _(state:T_State,moduploadid: str = ArgPlainText("moduploadid"),prompt=
 # 随机发送一个图包
 randam_boardgame = on_command("随机桌游",priority=50)
 @randam_boardgame.handle()
-async def _(bot: Bot, event: MessageEvent,state:T_State):
+async def _(bot: Bot, event: PrivateMessageEvent,state:T_State):
     message_list = []
     radam_data = randamboardgame()
 
@@ -922,9 +951,14 @@ def clear_table():
 
 
 # 将函数注册为定时任务
-@scheduler.scheduled_job('cron', hour='0')
+@scheduler.scheduled_job('cron', hour='1')
 async def _():
     clear_table()
+    
+# -----------------------cheche表每天删除-----------------------
+
+
+
 
 
 # ------------------欢迎新群友----------------
@@ -958,7 +992,7 @@ async  def  GroupNewMember ( bot :  Bot ,  event :  GroupIncreaseNoticeEvent ):
 # -----查看群列表（超级用户专用）
 search_group_list = on_command("查看群列表",permission=SUPERUSER)
 @search_group_list.handle()
-async def _(bot: Bot, event: MessageEvent):
+async def _(bot: Bot, event: PrivateMessageEvent):
     group_list = await bot.get_group_list()
     message = f"梨花已加入的群~"
     try:
