@@ -110,6 +110,8 @@ def get_BGinfo(bgid):
 
 #查询图包信息，返回参数为图包id和图包名称
 def get_tubaoname(tubao_name):
+    if tubao_name.isdigit() == True :
+        return get_tubaoinfo(tubao_name)
     data = []
     msg_list = []
     # 连接数据库
