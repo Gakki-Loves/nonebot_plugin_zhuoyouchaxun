@@ -22,27 +22,26 @@ from nonebot import utils
 from .player_info import player_search_info
 import re
 
+def query(sql_str):
+    conn = sqlite3.connect(
+        Path(os.path.join(os.path.dirname(__file__), "resource"))/"zhuoyou.db")
+# 创建游标
+    cur = conn.cursor()
+# 通过cur.execute执行sql语句，操作数据库
+    cursor = cur.execute(
+        sql_str
+    )
+# 得到查询结果
+    db_data = cur.fetchall()
+# 断开数据库连接
+    conn.close()
+    return db_data
 
 #返回列表，内容为桌游id和桌游名称
 def get_idname(name):
     data = []
     msg_list = []
-    # 连接数据库
-    conn = sqlite3.connect(
-       Path(os.path.join(os.path.dirname(__file__), "resource"))/"zhuoyou.db")
-    # 创建游标
-    #conn = sqlite3.connect(r'D:\Github\LihuaBot\nb2\LihuaBot\src\plugins\nonebot_plugin_zhuoyouchaxun\resource\zhuoyou.db')
-    cur = conn.cursor()
-    # 通过cur.execute执行sql语句，操作数据库
-    cursor = cur.execute(
-        f"SELECT BGId,BGName from boardgame WHERE BGName like '%{name}%' "
-    )
-    # 得到查询结果
-    db_data = cur.fetchall()
-
-    # 断开数据库连接
-    conn.close()
-
+    db_data = query(f"SELECT BGId,BGName from boardgame WHERE BGName like '%{name}%' ")
     # 如果没有结果
     try:
         if db_data == []:
@@ -66,22 +65,7 @@ def get_idname(name):
 # 桌游具体信息查询，参数为桌游ID
 def get_BGinfo(bgid):
     data = []
-    # 连接数据库
-    conn = sqlite3.connect(
-       Path(os.path.join(os.path.dirname(__file__), "resource"))/"zhuoyou.db")
-    # 创建游标
-    #conn = sqlite3.connect(r'D:\Github\LihuaBot\nb2\LihuaBot\src\plugins\nonebot_plugin_zhuoyouchaxun\resource\zhuoyou.db')
-    cur = conn.cursor()
-    # 通过cur.execute执行sql语句，操作数据库
-    cursor = cur.execute(
-        f"SELECT * from boardgame WHERE BGId like '{bgid}' "
-    )
-    # 得到查询结果
-    db_data = cur.fetchall()
-
-    # 断开数据库连接
-    conn.close()
-
+    db_data = query(f"SELECT * from boardgame WHERE BGId like '{bgid}' ")
     # 如果没有结果
     try:
         if db_data == []:
@@ -116,22 +100,7 @@ def get_tubaoname(tubao_name):
 
     data = []
     msg_list = []
-    # 连接数据库
-    conn = sqlite3.connect(
-       Path(os.path.join(os.path.dirname(__file__), "resource"))/"zhuoyou.db")
-    # 创建游标
-    #conn = sqlite3.connect(r'D:\Github\LihuaBot\nb2\LihuaBot\src\plugins\nonebot_plugin_zhuoyouchaxun\resource\zhuoyou.db')
-    cur = conn.cursor()
-    # 通过cur.execute执行sql语句，操作数据库
-    cursor = cur.execute(
-        f"SELECT tubao_id,tubao_name, file_name ,display from tubao WHERE ((tubao_name like '%{tubao_name}%' or file_name like '%{tubao_name}%') and display like 'True') "
-    )
-    # 得到查询结果
-    db_data = cur.fetchall()
-
-    # 断开数据库连接
-    conn.close()
-
+    db_data = query(f"SELECT tubao_id,tubao_name, file_name ,display from tubao WHERE ((tubao_name like '%{tubao_name}%' or file_name like '%{tubao_name}%') and display like 'True') ")
     # 如果没有结果
     try:
         if db_data == []:
@@ -155,22 +124,7 @@ def get_tubaoname(tubao_name):
 #根据图包id获取图包链接
 def get_tubaoinfo(tubao_id):
     data = []
-    # 连接数据库
-    conn = sqlite3.connect(
-       Path(os.path.join(os.path.dirname(__file__), "resource"))/"zhuoyou.db")
-    # 创建游标
-    #conn = sqlite3.connect(r'D:\Github\LihuaBot\nb2\LihuaBot\src\plugins\nonebot_plugin_zhuoyouchaxun\resource\zhuoyou.db')
-    cur = conn.cursor()
-    # 通过cur.execute执行sql语句，操作数据库
-    cursor = cur.execute(
-        f"SELECT * from tubao WHERE tubao_id like '{tubao_id}' "
-    )
-    # 得到查询结果
-    db_data = cur.fetchall()
-
-    # 断开数据库连接
-    conn.close()
-
+    db_data = query(f"SELECT * from tubao WHERE tubao_id like '{tubao_id}' ")
     # 如果没有结果
     try:
         if db_data == []  :
@@ -193,21 +147,7 @@ def get_tubaoinfo(tubao_id):
 # -----随机图包
 def randamboardgame():
     data = []
-    # 连接数据库
-    conn = sqlite3.connect(
-       Path(os.path.join(os.path.dirname(__file__), "resource"))/"zhuoyou.db")
-    # 创建游标
-    #conn = sqlite3.connect(r'D:\Github\LihuaBot\nb2\LihuaBot\src\plugins\nonebot_plugin_zhuoyouchaxun\resource\zhuoyou.db')
-    cur = conn.cursor()
-    # 得到查询结果
-    cursor = cur.execute(
-        f"SELECT * FROM tubao WHERE display like 'True' ORDER BY RANDOM() limit 1"
-    )
-
-    db_data = cur.fetchall()
-
-    # 断开数据库连接
-    conn.close()
+    db_data = query(f"SELECT * FROM tubao WHERE display like 'True' ORDER BY RANDOM() limit 1")
 
     msg = (
             "图包名称:"+ str(db_data[0][2])
@@ -291,16 +231,8 @@ def searchcar():
     data = []
     msg = []
     msg_list = []
-    conn = sqlite3.connect(
-       Path(os.path.join(os.path.dirname(__file__), "resource"))/"zhuoyou.db")
-    # 创建游标
-    #conn = sqlite3.connect(r'D:\Github\LihuaBot\nb2\LihuaBot\src\plugins\nonebot_plugin_zhuoyouchaxun\resource\zhuoyou.db')
-    cur = conn.cursor()
-    cursor = cur.execute(
-        f"SELECT * from cheche "
-    )
-    db_data = cur.fetchall()
-    conn.close
+    db_data = query(f"SELECT * from cheche ")
+
     try:
         if db_data == []:
             data.append([False,error, f"梨花去转了一圈，现在没有正在开的车车哦~"])
@@ -349,16 +281,7 @@ def search_reservecar():
     data = []
     msg = []
     msg_list = []
-    conn = sqlite3.connect(
-       Path(os.path.join(os.path.dirname(__file__), "resource"))/"zhuoyou.db")
-    # 创建游标
-    #conn = sqlite3.connect(r'D:\Github\LihuaBot\nb2\LihuaBot\src\plugins\nonebot_plugin_zhuoyouchaxun\resource\zhuoyou.db')
-    cur = conn.cursor()
-    cursor = cur.execute(
-        f"SELECT * from reserve "
-    )
-    db_data = cur.fetchall()
-    conn.close
+    db_data = query(f"SELECT * from reserve ")
     try:
         if db_data == []:
             data.append([False,error, f"梨花去转了一圈，暂时没有有效的未来车车哦~"])
@@ -398,16 +321,7 @@ def ifcarexist(playerid):
     data = []
     msg = []
     msg_list = []
-    conn = sqlite3.connect(
-       Path(os.path.join(os.path.dirname(__file__), "resource"))/"zhuoyou.db")
-    # 创建游标
-    #conn = sqlite3.connect(r'D:\Github\LihuaBot\nb2\LihuaBot\src\plugins\nonebot_plugin_zhuoyouchaxun\resource\zhuoyou.db')
-    cur = conn.cursor()
-    cursor = cur.execute(
-        f"SELECT * from cheche "
-    )
-    db_data = cur.fetchall()
-    conn.close
+    db_data = query(f"SELECT * from cheche ")
     try:
         if db_data == []:
             return True
@@ -437,21 +351,15 @@ def ifcarexist(playerid):
 def delete_car(carid,playerid):
     conn = sqlite3.connect(
        Path(os.path.join(os.path.dirname(__file__), "resource"))/"zhuoyou.db")
-    # 创建游标
-    #conn = sqlite3.connect(r'D:\Github\LihuaBot\nb2\LihuaBot\src\plugins\nonebot_plugin_zhuoyouchaxun\resource\zhuoyou.db')
-    cur = conn.cursor()
-    cursor = cur.execute(
-        f"SELECT * from cheche "
-    ) 
-    db_data = cur.fetchall()
+    db_data = query(f"SELECT * from cheche ")
     if db_data == []:
-        conn.close()
         return [False,"现在车库里没有车车可以封噢"]
-    cursor = cur.execute(
-        f"SELECT car_id from cheche WHERE car_id ='{carid}'"
-    ) 
-    db_data = cur.fetchall()
+    
+    db_data = query(f"SELECT car_id from cheche WHERE car_id ='{carid}'")
     if db_data:
+        conn = sqlite3.connect(
+        Path(os.path.join(os.path.dirname(__file__), "resource"))/"zhuoyou.db")
+        cur = conn.cursor()
         cur.execute(
             f"DELETE FROM cheche WHERE car_id ='{carid}'"
         )
@@ -459,7 +367,6 @@ def delete_car(carid,playerid):
         conn.close()
         return [True,"哥哥，强制封车成功啦！"] 
     else: 
-        conn.close()
         return [False,"车库里没有这辆车噢！"] 
 
 
@@ -494,54 +401,17 @@ def delete_car2(playerid):
 
 # -----查询图包数量
 def search_mod_count():
-    
-    # 连接数据库
-    conn = sqlite3.connect(
-       Path(os.path.join(os.path.dirname(__file__), "resource"))/"zhuoyou.db")
-    # 创建游标
-    #conn = sqlite3.connect(r'D:\Github\LihuaBot\nb2\LihuaBot\src\plugins\nonebot_plugin_zhuoyouchaxun\resource\zhuoyou.db')
-    cur = conn.cursor()
-    cur.execute(
-        f"SELECT COUNT(*) FROM tubao"
-    ) 
-    # 得到查询结果
-    db_data = cur.fetchall()
-    conn.close()
-    # 返回图包数量
+    db_data = query(f"SELECT COUNT(*) FROM tubao")
     return db_data
 
 # -----查询玩家数量
 def search_player_count():
-    
-    # 连接数据库
-    conn = sqlite3.connect(
-       Path(os.path.join(os.path.dirname(__file__), "resource"))/"zhuoyou.db")
-    # 创建游标
-    #conn = sqlite3.connect(r'D:\Github\LihuaBot\nb2\LihuaBot\src\plugins\nonebot_plugin_zhuoyouchaxun\resource\zhuoyou.db')
-    cur = conn.cursor()
-    cur.execute(
-        f"SELECT COUNT(*) FROM player"
-    ) 
-    # 得到查询结果
-    db_data = cur.fetchall()
-    conn.close()
-    # 返回图包数量
+    db_data = query(f"SELECT COUNT(*) FROM player")
     return db_data
 
 # -----查询图包上传者
 def search_mod_uploader(mod_id):
-
-    # 连接数据库
-    conn = sqlite3.connect(
-       Path(os.path.join(os.path.dirname(__file__), "resource"))/"zhuoyou.db")
-    # 创建游标
-    #conn = sqlite3.connect(r'D:\Github\LihuaBot\nb2\LihuaBot\src\plugins\nonebot_plugin_zhuoyouchaxun\resource\zhuoyou.db')
-    cur = conn.cursor()
-    cur.execute(
-        f"SELECT * from tubao WHERE tubao_id like '{mod_id}'"
-    ) 
-    # 得到查询结果
-    db_data = cur.fetchall()
+    db_data = query(f"SELECT * from tubao WHERE tubao_id like '{mod_id}'")
     return db_data
 
 # ---总车库记录信息
