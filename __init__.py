@@ -307,6 +307,11 @@ async def _(bot: Bot, event: MessageEvent,state: T_State):
     # 尝试发送
     try:
         if state['iftubao'] == True:
+
+            #如果图包查询查询的是id，那么就不应该进行之后的查询
+            if tubao_name.digit() == True:
+                state['iftubao'] = False
+
             if isinstance(event, PrivateMessageEvent):
                 for msg in message_list:
                     #await chaxun.send(msg)
